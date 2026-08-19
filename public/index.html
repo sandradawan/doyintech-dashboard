@@ -59,7 +59,6 @@
     <div class="nav-item" data-page="billing"><span>💳</span><span>Upgrade Plan</span></div>
     <div class="nav-item" data-page="settings"><span>⚙️</span><span>Settings</span></div>
   </aside>
-
   <main class="main">
     <section id="page-overview">
       <h1>Dashboard</h1>
@@ -70,9 +69,8 @@
         <div class="stat-card"><div class="label">Remaining Quota</div><div class="value green" id="stat-remaining">—</div></div>
         <div class="stat-card"><div class="label">Current Plan</div><div class="value" id="stat-plan">—</div></div>
       </div>
-      <div class="panel"><h2>Quick Start</h2><p style="color:var(--muted)">1. Set API URLs and key in <strong>Settings</strong><br>2. Test KYC or Property AI<br>3. Create keys or <strong>Upgrade Plan</strong></p></div>
+      <div class="panel"><h2>Quick Start</h2><p style="color:var(--muted)">1. Set API URLs and key in <strong>Settings</strong><br>2. Test KYC or Property AI<br>3. Create keys or <strong>Upgrade Plan</strong> (real Paystack)</p></div>
     </section>
-
     <section id="page-kyc" class="hidden">
       <h1>KYC API</h1>
       <p class="subtitle">BVN · NIN · Document · Face Match</p>
@@ -89,7 +87,6 @@
         <div class="result" id="kyc-result"></div>
       </div>
     </section>
-
     <section id="page-property" class="hidden">
       <h1>Property AI</h1>
       <p class="subtitle">Listings · Documents · Summaries · Improvements</p>
@@ -110,7 +107,6 @@
         <div class="result" id="prop-result"></div>
       </div>
     </section>
-
     <section id="page-keys" class="hidden">
       <h1>API Keys</h1>
       <p class="subtitle">Create keys · Usage is tracked automatically</p>
@@ -129,10 +125,9 @@
         <div id="usage-box" class="key-box">Click Refresh to load usage.</div>
       </div>
     </section>
-
     <section id="page-billing" class="hidden">
       <h1>Upgrade Plan</h1>
-      <p class="subtitle">Choose a plan and pay with Paystack</p>
+      <p class="subtitle">Pay with real Paystack checkout</p>
       <div class="panel">
         <h2>Your Email (for receipt)</h2>
         <input id="billing-email" type="email" placeholder="you@company.com" />
@@ -140,10 +135,9 @@
       <div class="plan-grid" id="plan-cards"></div>
       <div class="panel" style="margin-top:1.5rem">
         <h2>Payment Status</h2>
-        <div id="payment-result" class="key-box">Select a plan and click Upgrade to start payment.</div>
+        <div id="payment-result" class="key-box">Select a plan and click Upgrade. You will be redirected to Paystack.</div>
       </div>
     </section>
-
     <section id="page-settings" class="hidden">
       <h1>Settings</h1>
       <p class="subtitle">Point the dashboard to your deployed APIs</p>
@@ -158,218 +152,26 @@
       </div>
     </section>
   </main>
-
   <script>
-    document.getElementById("kyc-url").value = localStorage.getItem("dt_kyc_url") || "";
-    document.getElementById("prop-url").value = localStorage.getItem("dt_prop_url") || "";
-    document.getElementById("api-key").value = localStorage.getItem("dt_api_key") || "dev-key-123";
-
-    function saveSettings() {
-      localStorage.setItem("dt_kyc_url", document.getElementById("kyc-url").value.trim());
-      localStorage.setItem("dt_prop_url", document.getElementById("prop-url").value.trim());
-      localStorage.setItem("dt_api_key", document.getElementById("api-key").value.trim());
-      alert("Settings saved");
-      loadOverview();
-    }
-
-    function getConfig() {
-      return {
-        kycUrl: localStorage.getItem("dt_kyc_url") || "",
-        propUrl: localStorage.getItem("dt_prop_url") || "",
-        apiKey: localStorage.getItem("dt_api_key") || "dev-key-123"
-      };
-    }
-
-    document.querySelectorAll(".nav-item").forEach(item => {
-      item.addEventListener("click", () => {
-        document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-        item.classList.add("active");
-        const page = item.dataset.page;
-        document.querySelectorAll("main > section").forEach(s => s.classList.add("hidden"));
-        document.getElementById("page-" + page).classList.remove("hidden");
-        if (page === "overview") loadOverview();
-        if (page === "keys") loadUsage();
-        if (page === "billing") loadPlans();
-      });
-    });
-
-    const kycSamples = {
-      bvn: `{ "bvn": "12345678901", "firstName": "Adebayo", "lastName": "Okafor" }`,
-      nin: `{ "nin": "12345678901", "firstName": "Chioma", "lastName": "Nwosu" }`,
-      document: `{ "documentType": "passport", "documentImage": "base64..." }`,
-      "face-match": `{ "image1": "base64...", "image2": "base64..." }`
-    };
-    document.getElementById("kyc-endpoint").addEventListener("change", e => {
-      document.getElementById("kyc-body").value = kycSamples[e.target.value] || "{}";
-    });
-
-    async function callApi(base, path, body) {
-      const { apiKey } = getConfig();
-      if (!base) throw new Error("API base URL not set. Go to Settings.");
-      const res = await fetch(base.replace(/\/$/, "") + path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
-        body: JSON.stringify(body)
-      });
-      return res.json();
-    }
-
-    async function runKyc() {
-      const resultEl = document.getElementById("kyc-result");
-      resultEl.style.display = "block";
-      resultEl.textContent = "Loading...";
-      try {
-        const body = JSON.parse(document.getElementById("kyc-body").value);
-        const endpoint = document.getElementById("kyc-endpoint").value;
-        const { kycUrl } = getConfig();
-        const data = await callApi(kycUrl, "/v1/kyc/" + endpoint, body);
-        resultEl.textContent = JSON.stringify(data, null, 2);
-        loadOverview();
-      } catch (err) {
-        resultEl.textContent = "Error: " + err.message;
-      }
-    }
-
-    async function runProperty() {
-      const resultEl = document.getElementById("prop-result");
-      resultEl.style.display = "block";
-      resultEl.textContent = "Loading...";
-      try {
-        const body = JSON.parse(document.getElementById("prop-body").value);
-        const endpoint = document.getElementById("prop-endpoint").value;
-        const { propUrl } = getConfig();
-        const data = await callApi(propUrl, "/v1/property/" + endpoint, body);
-        resultEl.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        resultEl.textContent = "Error: " + err.message;
-      }
-    }
-
-    async function loadUsage() {
-      const box = document.getElementById("usage-box");
-      const { kycUrl, apiKey } = getConfig();
-      if (!kycUrl) { box.textContent = "Set KYC API URL in Settings first."; return; }
-      try {
-        const res = await fetch(kycUrl.replace(/\/$/, "") + "/v1/keys/me", { headers: { "X-API-Key": apiKey } });
-        const data = await res.json();
-        if (data.success) {
-          const d = data.data;
-          box.textContent = `Plan: ${d.plan}\nUsed: ${d.usedThisMonth} / ${d.monthlyLimit}\nRemaining: ${d.remaining}\nLast used: ${d.lastUsedAt || "—"}`;
-          document.getElementById("stat-kyc").textContent = d.usedThisMonth;
-          document.getElementById("stat-remaining").textContent = d.remaining;
-          document.getElementById("stat-plan").textContent = d.plan;
-          window._currentPlan = d.plan;
-        } else {
-          box.textContent = data.error || "Failed";
-        }
-      } catch (err) {
-        box.textContent = "Error: " + err.message;
-      }
-    }
-
-    async function createKey() {
-      const name = document.getElementById("new-key-name").value.trim();
-      const plan = document.getElementById("new-key-plan").value;
-      const resultEl = document.getElementById("key-result");
-      resultEl.style.display = "block";
-      if (!name) { resultEl.textContent = "Name required"; return; }
-      const { kycUrl } = getConfig();
-      if (!kycUrl) { resultEl.textContent = "Set KYC API URL first."; return; }
-      try {
-        const res = await fetch(kycUrl.replace(/\/$/, "") + "/v1/keys/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, plan })
-        });
-        const data = await res.json();
-        resultEl.textContent = JSON.stringify(data, null, 2);
-        if (data.success && data.data?.key) resultEl.textContent += "\n\n⚠️ Copy this key now – it will not be shown again.";
-      } catch (err) {
-        resultEl.textContent = "Error: " + err.message;
-      }
-    }
-
-    const PLAN_FEATURES = {
-      starter: ["500 API calls / month", "Email support", "Basic rate limits"],
-      growth: ["2,000 API calls / month", "Priority support", "Higher rate limits"],
-      business: ["10,000 API calls / month", "Dedicated support", "Custom rate limits"],
-      enterprise: ["Unlimited calls", "SLA + dedicated engineer", "Custom integrations"]
-    };
-
-    async function loadPlans() {
-      const container = document.getElementById("plan-cards");
-      container.innerHTML = "<p style='color:var(--muted)'>Loading plans...</p>";
-      const { kycUrl } = getConfig();
-      if (!kycUrl) {
-        container.innerHTML = "<p style='color:var(--muted)'>Set KYC API URL in Settings first.</p>";
-        return;
-      }
-      try {
-        const res = await fetch(kycUrl.replace(/\/$/, "") + "/v1/payment/plans");
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed to load plans");
-        const current = window._currentPlan || "growth";
-        container.innerHTML = data.data.map(p => {
-          const isCurrent = p.name === current;
-          const featured = p.name === "growth";
-          return `<div class="plan-card ${featured ? "featured" : ""}">
-            ${isCurrent ? '<span class="badge-current">Current</span>' : ""}
-            <div class="plan-name">${p.name}</div>
-            <div class="plan-price">${p.priceFormatted} <span>/mo</span></div>
-            <ul>${(PLAN_FEATURES[p.name] || []).map(f => `<li>${f}</li>`).join("")}</ul>
-            <button class="${isCurrent ? "" : "amber"}" ${isCurrent ? "disabled" : ""} onclick="startUpgrade('${p.name}')">
-              ${isCurrent ? "Current Plan" : "Upgrade"}
-            </button>
-          </div>`;
-        }).join("");
-      } catch (err) {
-        container.innerHTML = `<p style='color:#ef4444'>Error: ${err.message}</p>`;
-      }
-    }
-
-    async function startUpgrade(plan) {
-      const email = document.getElementById("billing-email").value.trim();
-      const resultEl = document.getElementById("payment-result");
-      if (!email) { resultEl.textContent = "Please enter your email first."; return; }
-      const { kycUrl, apiKey } = getConfig();
-      if (!kycUrl) { resultEl.textContent = "Set KYC API URL in Settings first."; return; }
-
-      resultEl.textContent = "Initializing payment...";
-      try {
-        const initRes = await fetch(kycUrl.replace(/\/$/, "") + "/v1/payment/initialize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
-          body: JSON.stringify({ plan, email })
-        });
-        const initData = await initRes.json();
-        if (!initData.success) throw new Error(initData.error || "Initialize failed");
-
-        const { reference, authorization_url } = initData.data;
-        resultEl.textContent = `Payment initialized.\nReference: ${reference}\n\nIn production you would be redirected to:\n${authorization_url}\n\nSimulating successful payment in 2 seconds...`;
-
-        setTimeout(async () => {
-          resultEl.textContent += "\n\nVerifying payment...";
-          const verifyRes = await fetch(kycUrl.replace(/\/$/, "") + "/v1/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
-            body: JSON.stringify({ reference, plan })
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            resultEl.textContent = `✅ Plan upgraded successfully!\n\nNew plan: ${verifyData.data.plan}\nMonthly limit: ${verifyData.data.monthlyLimit}\nReference: ${verifyData.data.reference}`;
-            window._currentPlan = plan;
-            loadOverview();
-            loadPlans();
-          } else {
-            resultEl.textContent = "Verify failed: " + (verifyData.error || "Unknown error");
-          }
-        }, 2000);
-      } catch (err) {
-        resultEl.textContent = "Error: " + err.message;
-      }
-    }
-
-    function loadOverview() { loadUsage(); }
+    document.getElementById("kyc-url").value=localStorage.getItem("dt_kyc_url")||"";
+    document.getElementById("prop-url").value=localStorage.getItem("dt_prop_url")||"";
+    document.getElementById("api-key").value=localStorage.getItem("dt_api_key")||"dev-key-123";
+    function saveSettings(){localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());alert("Settings saved");loadOverview()}
+    function getConfig(){return{kycUrl:localStorage.getItem("dt_kyc_url")||"",propUrl:localStorage.getItem("dt_prop_url")||"",apiKey:localStorage.getItem("dt_api_key")||"dev-key-123"}}
+    document.querySelectorAll(".nav-item").forEach(item=>{item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));item.classList.add("active");const page=item.dataset.page;document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-"+page).classList.remove("hidden");if(page==="overview")loadOverview();if(page==="keys")loadUsage();if(page==="billing")loadPlans()})});
+    const kycSamples={bvn:`{ "bvn": "12345678901", "firstName": "Adebayo", "lastName": "Okafor" }`,nin:`{ "nin": "12345678901", "firstName": "Chioma", "lastName": "Nwosu" }`,document:`{ "documentType": "passport", "documentImage": "base64..." }`,"face-match":`{ "image1": "base64...", "image2": "base64..." }`};
+    document.getElementById("kyc-endpoint").addEventListener("change",e=>{document.getElementById("kyc-body").value=kycSamples[e.target.value]||"{}"});
+    async function callApi(base,path,body){const{apiKey}=getConfig();if(!base)throw new Error("API base URL not set. Go to Settings.");const res=await fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify(body)});return res.json()}
+    async function runKyc(){const resultEl=document.getElementById("kyc-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("kyc-body").value);const endpoint=document.getElementById("kyc-endpoint").value;const{kycUrl}=getConfig();const data=await callApi(kycUrl,"/v1/kyc/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2);loadOverview()}catch(err){resultEl.textContent="Error: "+err.message}}
+    async function runProperty(){const resultEl=document.getElementById("prop-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("prop-body").value);const endpoint=document.getElementById("prop-endpoint").value;const{propUrl}=getConfig();const data=await callApi(propUrl,"/v1/property/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2)}catch(err){resultEl.textContent="Error: "+err.message}}
+    async function loadUsage(){const box=document.getElementById("usage-box");const{kycUrl,apiKey}=getConfig();if(!kycUrl){box.textContent="Set KYC API URL in Settings first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":apiKey}});const data=await res.json();if(data.success){const d=data.data;box.textContent=`Plan: ${d.plan}\nUsed: ${d.usedThisMonth} / ${d.monthlyLimit}\nRemaining: ${d.remaining}\nLast used: ${d.lastUsedAt||"—"}`;document.getElementById("stat-kyc").textContent=d.usedThisMonth;document.getElementById("stat-remaining").textContent=d.remaining;document.getElementById("stat-plan").textContent=d.plan;window._currentPlan=d.plan}else{box.textContent=data.error||"Failed"}}catch(err){box.textContent="Error: "+err.message}}
+    async function createKey(){const name=document.getElementById("new-key-name").value.trim();const plan=document.getElementById("new-key-plan").value;const resultEl=document.getElementById("key-result");resultEl.style.display="block";if(!name){resultEl.textContent="Name required";return}const{kycUrl}=getConfig();if(!kycUrl){resultEl.textContent="Set KYC API URL first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,plan})});const data=await res.json();resultEl.textContent=JSON.stringify(data,null,2);if(data.success&&data.data?.key)resultEl.textContent+="\n\n⚠️ Copy this key now – it will not be shown again."}catch(err){resultEl.textContent="Error: "+err.message}}
+    const PLAN_FEATURES={starter:["500 API calls / month","Email support","Basic rate limits"],growth:["2,000 API calls / month","Priority support","Higher rate limits"],business:["10,000 API calls / month","Dedicated support","Custom rate limits"],enterprise:["Unlimited calls","SLA + dedicated engineer","Custom integrations"]};
+    async function loadPlans(){const container=document.getElementById("plan-cards");container.innerHTML="<p style='color:var(--muted)'>Loading plans...</p>";const{kycUrl}=getConfig();if(!kycUrl){container.innerHTML="<p style='color:var(--muted)'>Set KYC API URL in Settings first.</p>";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/plans");const data=await res.json();if(!data.success)throw new Error(data.error||"Failed to load plans");const current=window._currentPlan||"growth";container.innerHTML=data.data.map(p=>{const isCurrent=p.name===current;const featured=p.name==="growth";return`<div class="plan-card ${featured?"featured":""}">${isCurrent?'<span class="badge-current">Current</span>':""}<div class="plan-name">${p.name}</div><div class="plan-price">${p.priceFormatted} <span>/mo</span></div><ul>${(PLAN_FEATURES[p.name]||[]).map(f=>`<li>${f}</li>`).join("")}</ul><button class="${isCurrent?"":"amber"}" ${isCurrent?"disabled":""} onclick="startUpgrade('${p.name}')">${isCurrent?"Current Plan":"Upgrade"}</button></div>`}).join("")}catch(err){container.innerHTML=`<p style='color:#ef4444'>Error: ${err.message}</p>`}}
+    async function startUpgrade(plan){const email=document.getElementById("billing-email").value.trim();const resultEl=document.getElementById("payment-result");if(!email){resultEl.textContent="Please enter your email first.";return}const{kycUrl,apiKey}=getConfig();if(!kycUrl){resultEl.textContent="Set KYC API URL in Settings first.";return}resultEl.textContent="Initializing Paystack payment...";try{const initRes=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({plan,email})});const initData=await initRes.json();if(!initData.success)throw new Error(initData.error||"Initialize failed");const{reference,authorization_url}=initData.data;localStorage.setItem("dt_pending_ref",reference);localStorage.setItem("dt_pending_plan",plan);resultEl.textContent=`Redirecting to Paystack...\nReference: ${reference}`;window.location.href=authorization_url}catch(err){resultEl.textContent="Error: "+err.message}}
+    async function handlePaymentCallback(){const params=new URLSearchParams(window.location.search);const reference=params.get("reference")||params.get("trxref")||localStorage.getItem("dt_pending_ref");const plan=localStorage.getItem("dt_pending_plan");if(!reference)return;document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));document.querySelector('[data-page="billing"]').classList.add("active");document.querySelectorAll("main > section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-billing").classList.remove("hidden");const resultEl=document.getElementById("payment-result");resultEl.textContent="Verifying payment with Paystack...";const{kycUrl,apiKey}=getConfig();try{const verifyRes=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/verify",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({reference,plan})});const verifyData=await verifyRes.json();if(verifyData.success){resultEl.textContent=`✅ Payment verified!\n\nNew plan: ${verifyData.data.plan}\nMonthly limit: ${verifyData.data.monthlyLimit}\nReference: ${verifyData.data.reference}\nPaid at: ${verifyData.data.paidAt||"—"}`;window._currentPlan=verifyData.data.plan;localStorage.removeItem("dt_pending_ref");localStorage.removeItem("dt_pending_plan");window.history.replaceState({},"",window.location.pathname);loadOverview();loadPlans()}else{resultEl.textContent="Verification failed: "+(verifyData.error||"Unknown error")}}catch(err){resultEl.textContent="Error verifying: "+err.message}}
+    if(window.location.search.includes("reference")||window.location.search.includes("trxref")||localStorage.getItem("dt_pending_ref")){setTimeout(handlePaymentCallback,300)}
+    function loadOverview(){loadUsage()}
     loadOverview();
   </script>
 </body>
