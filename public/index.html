@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DoyinTech API Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#07071a;--sidebar:#0d0d24;--card:#12122e;--border:#1c1c3a;--blue:#3b82f6;--amber:#f59e0b;--green:#22c55e;--text:#e2e8f0;--muted:#94a3b8}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+    .sidebar{width:240px;background:var(--sidebar);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;position:fixed;height:100vh}
+    .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.15rem;margin-bottom:2.5rem;padding:0 .5rem}
+    .logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a0a1a}
+    .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:10px;color:var(--muted);cursor:pointer;margin-bottom:.25rem;font-size:.95rem;font-weight:500}
+    .nav-item:hover,.nav-item.active{background:rgba(59,130,246,.12);color:#60a5fa}
+    .main{margin-left:240px;flex:1;padding:2rem 2.5rem;max-width:1100px}
+    h1{font-size:1.75rem;font-weight:700;margin-bottom:.35rem}
+    .subtitle{color:var(--muted);margin-bottom:2rem}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.4rem}
+    .stat-card .label{color:var(--muted);font-size:.85rem;margin-bottom:.35rem}
+    .stat-card .value{font-size:1.6rem;font-weight:700}
+    .stat-card .value.amber{color:var(--amber)}.stat-card .value.blue{color:#60a5fa}.stat-card .value.green{color:var(--green)}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+    .panel h2{font-size:1.15rem;margin-bottom:1.25rem}
+    label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem}
+    input,select,textarea{width:100%;background:#0a0a1f;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;color:var(--text);font-family:inherit;font-size:.95rem;margin-bottom:1rem}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+    button{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;padding:.7rem 1.4rem;font-weight:600;cursor:pointer;font-size:.95rem}
+    button.amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a1a}
+    button:hover{opacity:.9}button:disabled{opacity:.5;cursor:not-allowed}
+    .result{background:#0a0a1f;border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-top:1rem;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:.82rem;max-height:360px;overflow:auto;display:none}
+    .hidden{display:none!important}
+    .config-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .key-box{background:#0a0a1f;border:1px dashed var(--border);border-radius:10px;padding:.9rem 1rem;font-family:ui-monospace,monospace;font-size:.9rem;word-break:break-all}
+    @media(max-width:800px){.sidebar{width:70px}.sidebar .logo span,.nav-item span:last-child{display:none}.main{margin-left:70px;padding:1.5rem 1rem}.config-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-icon">D</div><span>DoyinTech</span></div>
+    <div class="nav-item active" data-page="overview"><span>📊</span><span>Overview</span></div>
+    <div class="nav-item" data-page="kyc"><span>🪪</span><span>KYC API</span></div>
+    <div class="nav-item" data-page="property"><span>🏡</span><span>Property AI</span></div>
+    <div class="nav-item" data-page="keys"><span>🔑</span><span>API Keys</span></div>
+    <div class="nav-item" data-page="settings"><span>⚙️</span><span>Settings</span></div>
+  </aside>
+  <main class="main">
+    <section id="page-overview">
+      <h1>Dashboard</h1>
+      <p class="subtitle">Manage and test your DoyinTech APIs</p>
+      <div class="cards">
+        <div class="stat-card"><div class="label">KYC Calls (month)</div><div class="value blue" id="stat-kyc">—</div></div>
+        <div class="stat-card"><div class="label">Property AI Calls</div><div class="value amber" id="stat-prop">—</div></div>
+        <div class="stat-card"><div class="label">Remaining Quota</div><div class="value green" id="stat-remaining">—</div></div>
+        <div class="stat-card"><div class="label">Current Plan</div><div class="value" id="stat-plan">—</div></div>
+      </div>
+      <div class="panel"><h2>Quick Start</h2><p style="color:var(--muted)">1. Set API URLs and key in <strong>Settings</strong><br>2. Test KYC or Property AI<br>3. Create extra keys under <strong>API Keys</strong></p></div>
+    </section>
+    <section id="page-kyc" class="hidden">
+      <h1>KYC API</h1>
+      <p class="subtitle">BVN · NIN · Document · Face Match</p>
+      <div class="panel">
+        <label>Endpoint</label>
+        <select id="kyc-endpoint"><option value="bvn">POST /v1/kyc/bvn</option><option value="nin">POST /v1/kyc/nin</option><option value="document">POST /v1/kyc/document</option><option value="face-match">POST /v1/kyc/face-match</option></select>
+        <label>Request Body (JSON)</label>
+        <textarea id="kyc-body" rows="7">{
+  "bvn": "12345678901",
+  "firstName": "Adebayo",
+  "lastName": "Okafor"
+}</textarea>
+        <button onclick="runKyc()">Run KYC Request</button>
+        <div class="result" id="kyc-result"></div>
+      </div>
+    </section>
+    <section id="page-property" class="hidden">
+      <h1>Property AI</h1>
+      <p class="subtitle">Listings · Documents · Summaries · Improvements</p>
+      <div class="panel">
+        <label>Endpoint</label>
+        <select id="prop-endpoint"><option value="generate-description">Generate Description</option><option value="analyze-document">Analyze Document</option><option value="summarize">Summarize</option><option value="suggest-improvements">Suggest Improvements</option></select>
+        <label>Request Body (JSON)</label>
+        <textarea id="prop-body" rows="9">{
+  "location": "Lekki Phase 1, Lagos",
+  "propertyType": "apartment",
+  "bedrooms": 3,
+  "bathrooms": 3,
+  "price": "₦85,000,000",
+  "features": ["swimming pool", "24/7 power", "gym"],
+  "tone": "luxury"
+}</textarea>
+        <button class="amber" onclick="runProperty()">Run Property Request</button>
+        <div class="result" id="prop-result"></div>
+      </div>
+    </section>
+    <section id="page-keys" class="hidden">
+      <h1>API Keys</h1>
+      <p class="subtitle">Create keys · Usage is tracked automatically</p>
+      <div class="panel">
+        <h2>Create New Key</h2>
+        <div class="config-row">
+          <div><label>Key Name</label><input id="new-key-name" placeholder="Production App" /></div>
+          <div><label>Plan</label><select id="new-key-plan"><option value="starter">Starter (500/mo)</option><option value="growth">Growth (2,000/mo)</option><option value="business">Business (10,000/mo)</option></select></div>
+        </div>
+        <button onclick="createKey()">Create Key</button>
+        <div class="result" id="key-result"></div>
+      </div>
+      <div class="panel">
+        <h2>Current Key Usage</h2>
+        <button onclick="loadUsage()" style="margin-bottom:1rem">Refresh Usage</button>
+        <div id="usage-box" class="key-box">Click Refresh to load usage.</div>
+      </div>
+    </section>
+    <section id="page-settings" class="hidden">
+      <h1>Settings</h1>
+      <p class="subtitle">Point the dashboard to your deployed APIs</p>
+      <div class="panel">
+        <label>KYC API Base URL</label>
+        <input id="kyc-url" placeholder="https://your-kyc-api.up.railway.app" />
+        <label>Property AI API Base URL</label>
+        <input id="prop-url" placeholder="https://your-property-api.up.railway.app" />
+        <label>API Key</label>
+        <input id="api-key" placeholder="dev-key-123" />
+        <button onclick="saveSettings()">Save Settings</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.getElementById("kyc-url").value=localStorage.getItem("dt_kyc_url")||"";
+    document.getElementById("prop-url").value=localStorage.getItem("dt_prop_url")||"";
+    document.getElementById("api-key").value=localStorage.getItem("dt_api_key")||"dev-key-123";
+    function saveSettings(){localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());alert("Settings saved");loadOverview()}
+    function getConfig(){return{kycUrl:localStorage.getItem("dt_kyc_url")||"",propUrl:localStorage.getItem("dt_prop_url")||"",apiKey:localStorage.getItem("dt_api_key")||"dev-key-123"}}
+    document.querySelectorAll(".nav-item").forEach(item=>{item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));item.classList.add("active");const page=item.dataset.page;document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-"+page).classList.remove("hidden");if(page==="overview")loadOverview();if(page==="keys")loadUsage()})});
+    const kycSamples={bvn:`{ "bvn": "12345678901", "firstName": "Adebayo", "lastName": "Okafor" }`,nin:`{ "nin": "12345678901", "firstName": "Chioma", "lastName": "Nwosu" }`,document:`{ "documentType": "passport", "documentImage": "base64..." }`,"face-match":`{ "image1": "base64...", "image2": "base64..." }`};
+    document.getElementById("kyc-endpoint").addEventListener("change",e=>{document.getElementById("kyc-body").value=kycSamples[e.target.value]||"{}"});
+    async function callApi(base,path,body){const{apiKey}=getConfig();if(!base)throw new Error("API base URL not set. Go to Settings.");const res=await fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify(body)});return res.json()}
+    async function runKyc(){const resultEl=document.getElementById("kyc-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("kyc-body").value);const endpoint=document.getElementById("kyc-endpoint").value;const{kycUrl}=getConfig();const data=await callApi(kycUrl,"/v1/kyc/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2);loadOverview()}catch(err){resultEl.textContent="Error: "+err.message}}
+    async function runProperty(){const resultEl=document.getElementById("prop-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("prop-body").value);const endpoint=document.getElementById("prop-endpoint").value;const{propUrl}=getConfig();const data=await callApi(propUrl,"/v1/property/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2)}catch(err){resultEl.textContent="Error: "+err.message}}
+    async function loadUsage(){const box=document.getElementById("usage-box");const{kycUrl,apiKey}=getConfig();if(!kycUrl){box.textContent="Set KYC API URL in Settings first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":apiKey}});const data=await res.json();if(data.success){const d=data.data;box.textContent=`Plan: ${d.plan}\nUsed: ${d.usedThisMonth} / ${d.monthlyLimit}\nRemaining: ${d.remaining}\nLast used: ${d.lastUsedAt||"—"}`;document.getElementById("stat-kyc").textContent=d.usedThisMonth;document.getElementById("stat-remaining").textContent=d.remaining;document.getElementById("stat-plan").textContent=d.plan}else{box.textContent=data.error||"Failed"}}catch(err){box.textContent="Error: "+err.message}}
+    async function createKey(){const name=document.getElementById("new-key-name").value.trim();const plan=document.getElementById("new-key-plan").value;const resultEl=document.getElementById("key-result");resultEl.style.display="block";if(!name){resultEl.textContent="Name required";return}const{kycUrl}=getConfig();if(!kycUrl){resultEl.textContent="Set KYC API URL first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,plan})});const data=await res.json();resultEl.textContent=JSON.stringify(data,null,2);if(data.success&&data.data?.key)resultEl.textContent+="\n\n⚠️ Copy this key now – it will not be shown again."}catch(err){resultEl.textContent="Error: "+err.message}}
+    function loadOverview(){loadUsage()}
+    loadOverview();
+  </script>
+</body>
+</html>
