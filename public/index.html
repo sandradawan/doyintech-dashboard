@@ -5,54 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DoyinTech API Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    :root{--bg:#07071a;--sidebar:#0d0d24;--card:#12122e;--border:#1c1c3a;--blue:#3b82f6;--amber:#f59e0b;--green:#22c55e;--text:#e2e8f0;--muted:#94a3b8}
+    :root{--bg:#07071a;--sidebar:#0d0d24;--card:#12122e;--border:#1c1c3a;--blue:#3b82f6;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
     .sidebar{width:240px;background:var(--sidebar);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10}
-    .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.15rem;margin-bottom:2.5rem;padding:0 .5rem}
+    .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.15rem;margin-bottom:2rem;padding:0 .5rem}
     .logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a0a1a}
-    .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:10px;color:var(--muted);cursor:pointer;margin-bottom:.25rem;font-size:.95rem;font-weight:500}
+    .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:10px;color:var(--muted);cursor:pointer;margin-bottom:.25rem;font-size:.92rem;font-weight:500}
     .nav-item:hover,.nav-item.active{background:rgba(59,130,246,.12);color:#60a5fa}
-    .main{margin-left:240px;flex:1;padding:2rem 2.5rem;max-width:1100px}
-    h1{font-size:1.75rem;font-weight:700;margin-bottom:.35rem}
-    .subtitle{color:var(--muted);margin-bottom:2rem}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
-    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.4rem}
-    .stat-card .label{color:var(--muted);font-size:.85rem;margin-bottom:.35rem}
-    .stat-card .value{font-size:1.5rem;font-weight:700}
-    .stat-card .value.amber{color:var(--amber)}.stat-card .value.blue{color:#60a5fa}.stat-card .value.green{color:var(--green)}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
-    .panel h2{font-size:1.15rem;margin-bottom:1.25rem}
-    label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem}
-    input,select,textarea{width:100%;background:#0a0a1f;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;color:var(--text);font-family:inherit;font-size:.95rem;margin-bottom:1rem}
+    .main{margin-left:240px;flex:1;padding:2rem 2.5rem;max-width:1200px}
+    h1{font-size:1.7rem;font-weight:700;margin-bottom:.3rem}
+    .subtitle{color:var(--muted);margin-bottom:1.75rem;font-size:.95rem}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.15rem 1.3rem}
+    .stat-card .label{color:var(--muted);font-size:.8rem;margin-bottom:.3rem}
+    .stat-card .value{font-size:1.45rem;font-weight:700}
+    .stat-card .value.blue{color:#60a5fa}.stat-card .value.amber{color:var(--amber)}.stat-card .value.green{color:var(--green)}.stat-card .value.red{color:var(--red)}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem;margin-bottom:1.25rem}
+    .panel h2{font-size:1.1rem;margin-bottom:1rem}
+    label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.35rem}
+    input,select,textarea{width:100%;background:#0a0a1f;border:1px solid var(--border);border-radius:10px;padding:.65rem .9rem;color:var(--text);font-family:inherit;font-size:.92rem;margin-bottom:.9rem}
     input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
-    button{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;padding:.7rem 1.4rem;font-weight:600;cursor:pointer;font-size:.95rem}
+    button{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;padding:.65rem 1.3rem;font-weight:600;cursor:pointer;font-size:.92rem}
     button.amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a1a}
     button:hover{opacity:.9}button:disabled{opacity:.5;cursor:not-allowed}
-    .result{background:#0a0a1f;border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-top:1rem;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:.82rem;max-height:360px;overflow:auto;display:none}
+    .result{background:#0a0a1f;border:1px solid var(--border);border-radius:12px;padding:1rem;margin-top:1rem;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:.8rem;max-height:320px;overflow:auto;display:none}
     .hidden{display:none!important}
     .config-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    .key-box{background:#0a0a1f;border:1px dashed var(--border);border-radius:10px;padding:.9rem 1rem;font-family:ui-monospace,monospace;font-size:.9rem;word-break:break-all}
-    .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem}
-    .plan-card{background:#0a0a1f;border:1px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;transition:border-color .2s}
-    .plan-card:hover{border-color:#3b82f6}
+    .key-box{background:#0a0a1f;border:1px dashed var(--border);border-radius:10px;padding:.85rem 1rem;font-family:ui-monospace,monospace;font-size:.85rem;word-break:break-all}
+    .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.1rem}
+    .plan-card{background:#0a0a1f;border:1px solid var(--border);border-radius:14px;padding:1.3rem;position:relative}
     .plan-card.featured{border-color:#f59e0b}
-    .plan-card .plan-name{font-size:1.1rem;font-weight:700;margin-bottom:.25rem;text-transform:capitalize}
-    .plan-card .plan-price{font-size:1.6rem;font-weight:700;color:var(--amber);margin-bottom:.5rem}
-    .plan-card .plan-price span{font-size:.85rem;color:var(--muted);font-weight:500}
-    .plan-card ul{list-style:none;margin:1rem 0;color:var(--muted);font-size:.9rem}
-    .plan-card ul li{margin-bottom:.4rem;padding-left:1.2rem;position:relative}
+    .plan-card .plan-name{font-weight:700;text-transform:capitalize;margin-bottom:.2rem}
+    .plan-card .plan-price{font-size:1.4rem;font-weight:700;color:var(--amber);margin-bottom:.5rem}
+    .plan-card .plan-price span{font-size:.8rem;color:var(--muted);font-weight:500}
+    .plan-card ul{list-style:none;margin:.8rem 0;color:var(--muted);font-size:.85rem}
+    .plan-card ul li{margin-bottom:.3rem;padding-left:1.1rem;position:relative}
     .plan-card ul li::before{content:"✓";position:absolute;left:0;color:var(--green)}
-    .plan-card button{width:100%;margin-top:.5rem}
-    .badge-current{position:absolute;top:12px;right:12px;background:rgba(34,197,94,.15);color:#4ade80;font-size:.7rem;padding:.2rem .6rem;border-radius:999px;font-weight:600}
-    @media(max-width:800px){.sidebar{width:70px}.sidebar .logo span,.nav-item span:last-child{display:none}.main{margin-left:70px;padding:1.5rem 1rem}.config-row{grid-template-columns:1fr}}
+    .plan-card button{width:100%;margin-top:.4rem}
+    .badge-current{position:absolute;top:10px;right:10px;background:rgba(34,197,94,.15);color:#4ade80;font-size:.68rem;padding:.15rem .5rem;border-radius:999px;font-weight:600}
+    .chart-wrap{position:relative;height:220px;margin-top:.5rem}
+    table{width:100%;border-collapse:collapse;font-size:.85rem}
+    th,td{padding:.55rem .7rem;text-align:left;border-bottom:1px solid var(--border)}
+    th{color:var(--muted);font-weight:500}
+    .status-ok{color:var(--green)}.status-err{color:var(--red)}
+    .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @media(max-width:800px){.sidebar{width:70px}.sidebar .logo span,.nav-item span:last-child{display:none}.main{margin-left:70px;padding:1.25rem 1rem}.config-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="logo"><div class="logo-icon">D</div><span>DoyinTech</span></div>
     <div class="nav-item active" data-page="overview"><span>📊</span><span>Overview</span></div>
+    <div class="nav-item" data-page="analytics"><span>📈</span><span>Analytics</span></div>
     <div class="nav-item" data-page="kyc"><span>🪪</span><span>KYC API</span></div>
     <div class="nav-item" data-page="property"><span>🏡</span><span>Property AI</span></div>
     <div class="nav-item" data-page="keys"><span>🔑</span><span>API Keys</span></div>
@@ -61,118 +69,121 @@
   </aside>
   <main class="main">
     <section id="page-overview">
-      <h1>Dashboard</h1>
-      <p class="subtitle">Manage and test your DoyinTech APIs</p>
+      <h1><span class="live-dot"></span>Dashboard</h1>
+      <p class="subtitle">Real-time API usage & status</p>
       <div class="cards">
-        <div class="stat-card"><div class="label">KYC Calls (month)</div><div class="value blue" id="stat-kyc">—</div></div>
-        <div class="stat-card"><div class="label">Property AI Calls</div><div class="value amber" id="stat-prop">—</div></div>
-        <div class="stat-card"><div class="label">Remaining Quota</div><div class="value green" id="stat-remaining">—</div></div>
-        <div class="stat-card"><div class="label">Current Plan</div><div class="value" id="stat-plan">—</div></div>
+        <div class="stat-card"><div class="label">Total Calls</div><div class="value blue" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="label">Last 24h</div><div class="value amber" id="stat-24h">—</div></div>
+        <div class="stat-card"><div class="label">Success</div><div class="value green" id="stat-ok">—</div></div>
+        <div class="stat-card"><div class="label">Failed</div><div class="value red" id="stat-fail">—</div></div>
+        <div class="stat-card"><div class="label">Avg Latency</div><div class="value" id="stat-latency">—</div></div>
+        <div class="stat-card"><div class="label">Quota Left</div><div class="value green" id="stat-remaining">—</div></div>
+        <div class="stat-card"><div class="label">Plan</div><div class="value" id="stat-plan">—</div></div>
       </div>
-      <div class="panel"><h2>Quick Start</h2><p style="color:var(--muted)">1. Set API URLs and key in <strong>Settings</strong><br>2. Test KYC or Property AI<br>3. Create keys or <strong>Upgrade Plan</strong> (real Paystack)</p></div>
+      <div class="panel"><h2>Quick actions</h2><p style="color:var(--muted);font-size:.9rem">Configure APIs in Settings → run live tests → view Analytics → upgrade with Paystack.</p></div>
+    </section>
+    <section id="page-analytics" class="hidden">
+      <h1>Analytics Report</h1>
+      <p class="subtitle">Live API call analytics</p>
+      <div class="cards">
+        <div class="stat-card"><div class="label">Total</div><div class="value blue" id="a-total">0</div></div>
+        <div class="stat-card"><div class="label">Success rate</div><div class="value green" id="a-rate">—</div></div>
+        <div class="stat-card"><div class="label">Avg latency</div><div class="value" id="a-lat">—</div></div>
+        <div class="stat-card"><div class="label">Last 24h</div><div class="value amber" id="a-24">0</div></div>
+      </div>
+      <div class="panel"><h2>Calls by day</h2><div class="chart-wrap"><canvas id="chart-day"></canvas></div></div>
+      <div class="panel"><h2>Calls by endpoint</h2><div class="chart-wrap"><canvas id="chart-ep"></canvas></div></div>
+      <div class="panel">
+        <h2>Recent events</h2>
+        <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Endpoint</th><th>Status</th><th>Latency</th></tr></thead><tbody id="events-body"><tr><td colspan="4" style="color:var(--muted)">Load analytics to see events</td></tr></tbody></table></div>
+        <button style="margin-top:1rem" onclick="loadAnalytics()">Refresh Analytics</button>
+      </div>
     </section>
     <section id="page-kyc" class="hidden">
       <h1>KYC API</h1>
-      <p class="subtitle">BVN · NIN · Document · Face Match</p>
+      <p class="subtitle">Live BVN · NIN · Document · Face Match</p>
       <div class="panel">
         <label>Endpoint</label>
         <select id="kyc-endpoint"><option value="bvn">POST /v1/kyc/bvn</option><option value="nin">POST /v1/kyc/nin</option><option value="document">POST /v1/kyc/document</option><option value="face-match">POST /v1/kyc/face-match</option></select>
         <label>Request Body (JSON)</label>
-        <textarea id="kyc-body" rows="7">{
-  "bvn": "12345678901",
-  "firstName": "Adebayo",
-  "lastName": "Okafor"
-}</textarea>
-        <button onclick="runKyc()">Run KYC Request</button>
+        <textarea id="kyc-body" rows="6">{"bvn":"12345678901","firstName":"Adebayo","lastName":"Okafor"}</textarea>
+        <button onclick="runKyc()">Run Request</button>
         <div class="result" id="kyc-result"></div>
       </div>
     </section>
     <section id="page-property" class="hidden">
       <h1>Property AI</h1>
-      <p class="subtitle">Listings · Documents · Summaries · Improvements</p>
+      <p class="subtitle">Live listings · documents · summaries</p>
       <div class="panel">
         <label>Endpoint</label>
         <select id="prop-endpoint"><option value="generate-description">Generate Description</option><option value="analyze-document">Analyze Document</option><option value="summarize">Summarize</option><option value="suggest-improvements">Suggest Improvements</option></select>
         <label>Request Body (JSON)</label>
-        <textarea id="prop-body" rows="9">{
-  "location": "Lekki Phase 1, Lagos",
-  "propertyType": "apartment",
-  "bedrooms": 3,
-  "bathrooms": 3,
-  "price": "₦85,000,000",
-  "features": ["swimming pool", "24/7 power", "gym"],
-  "tone": "luxury"
-}</textarea>
-        <button class="amber" onclick="runProperty()">Run Property Request</button>
+        <textarea id="prop-body" rows="8">{"location":"Lekki Phase 1, Lagos","propertyType":"apartment","bedrooms":3,"bathrooms":3,"price":"₦85,000,000","features":["swimming pool","24/7 power","gym"],"tone":"luxury"}</textarea>
+        <button class="amber" onclick="runProperty()">Run Request</button>
         <div class="result" id="prop-result"></div>
       </div>
     </section>
     <section id="page-keys" class="hidden">
       <h1>API Keys</h1>
-      <p class="subtitle">Create keys · Usage is tracked automatically</p>
+      <p class="subtitle">Create keys · quota enforced in real time</p>
       <div class="panel">
-        <h2>Create New Key</h2>
+        <h2>Create Key</h2>
         <div class="config-row">
-          <div><label>Key Name</label><input id="new-key-name" placeholder="Production App" /></div>
-          <div><label>Plan</label><select id="new-key-plan"><option value="starter">Starter (500/mo)</option><option value="growth">Growth (2,000/mo)</option><option value="business">Business (10,000/mo)</option></select></div>
+          <div><label>Name</label><input id="new-key-name" placeholder="Production App" /></div>
+          <div><label>Plan</label><select id="new-key-plan"><option value="starter">Starter</option><option value="growth">Growth</option><option value="business">Business</option></select></div>
         </div>
-        <button onclick="createKey()">Create Key</button>
+        <button onclick="createKey()">Create</button>
         <div class="result" id="key-result"></div>
       </div>
       <div class="panel">
-        <h2>Current Key Usage</h2>
-        <button onclick="loadUsage()" style="margin-bottom:1rem">Refresh Usage</button>
-        <div id="usage-box" class="key-box">Click Refresh to load usage.</div>
+        <h2>Current usage</h2>
+        <button onclick="loadUsage()" style="margin-bottom:.8rem">Refresh</button>
+        <div id="usage-box" class="key-box">—</div>
       </div>
     </section>
     <section id="page-billing" class="hidden">
       <h1>Upgrade Plan</h1>
-      <p class="subtitle">Pay with real Paystack checkout</p>
-      <div class="panel">
-        <h2>Your Email (for receipt)</h2>
-        <input id="billing-email" type="email" placeholder="you@company.com" />
-      </div>
+      <p class="subtitle">Real Paystack checkout</p>
+      <div class="panel"><label>Email</label><input id="billing-email" type="email" placeholder="you@company.com" /></div>
       <div class="plan-grid" id="plan-cards"></div>
-      <div class="panel" style="margin-top:1.5rem">
-        <h2>Payment Status</h2>
-        <div id="payment-result" class="key-box">Select a plan and click Upgrade. You will be redirected to Paystack.</div>
-      </div>
+      <div class="panel" style="margin-top:1.2rem"><h2>Status</h2><div id="payment-result" class="key-box">Select a plan to pay with Paystack.</div></div>
     </section>
     <section id="page-settings" class="hidden">
       <h1>Settings</h1>
-      <p class="subtitle">Point the dashboard to your deployed APIs</p>
+      <p class="subtitle">Connect your live API deployments</p>
       <div class="panel">
         <label>KYC API Base URL</label>
-        <input id="kyc-url" placeholder="https://your-kyc-api.up.railway.app" />
+        <input id="kyc-url" placeholder="https://your-kyc.up.railway.app" />
         <label>Property AI API Base URL</label>
-        <input id="prop-url" placeholder="https://your-property-api.up.railway.app" />
+        <input id="prop-url" placeholder="https://your-property.up.railway.app" />
         <label>API Key</label>
         <input id="api-key" placeholder="dev-key-123" />
-        <button onclick="saveSettings()">Save Settings</button>
+        <button onclick="saveSettings()">Save</button>
       </div>
     </section>
   </main>
   <script>
+    let chartDay=null,chartEp=null;
     document.getElementById("kyc-url").value=localStorage.getItem("dt_kyc_url")||"";
     document.getElementById("prop-url").value=localStorage.getItem("dt_prop_url")||"";
     document.getElementById("api-key").value=localStorage.getItem("dt_api_key")||"dev-key-123";
-    function saveSettings(){localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());alert("Settings saved");loadOverview()}
+    function saveSettings(){localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());alert("Saved");loadOverview()}
     function getConfig(){return{kycUrl:localStorage.getItem("dt_kyc_url")||"",propUrl:localStorage.getItem("dt_prop_url")||"",apiKey:localStorage.getItem("dt_api_key")||"dev-key-123"}}
-    document.querySelectorAll(".nav-item").forEach(item=>{item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));item.classList.add("active");const page=item.dataset.page;document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-"+page).classList.remove("hidden");if(page==="overview")loadOverview();if(page==="keys")loadUsage();if(page==="billing")loadPlans()})});
-    const kycSamples={bvn:`{ "bvn": "12345678901", "firstName": "Adebayo", "lastName": "Okafor" }`,nin:`{ "nin": "12345678901", "firstName": "Chioma", "lastName": "Nwosu" }`,document:`{ "documentType": "passport", "documentImage": "base64..." }`,"face-match":`{ "image1": "base64...", "image2": "base64..." }`};
-    document.getElementById("kyc-endpoint").addEventListener("change",e=>{document.getElementById("kyc-body").value=kycSamples[e.target.value]||"{}"});
-    async function callApi(base,path,body){const{apiKey}=getConfig();if(!base)throw new Error("API base URL not set. Go to Settings.");const res=await fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify(body)});return res.json()}
-    async function runKyc(){const resultEl=document.getElementById("kyc-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("kyc-body").value);const endpoint=document.getElementById("kyc-endpoint").value;const{kycUrl}=getConfig();const data=await callApi(kycUrl,"/v1/kyc/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2);loadOverview()}catch(err){resultEl.textContent="Error: "+err.message}}
-    async function runProperty(){const resultEl=document.getElementById("prop-result");resultEl.style.display="block";resultEl.textContent="Loading...";try{const body=JSON.parse(document.getElementById("prop-body").value);const endpoint=document.getElementById("prop-endpoint").value;const{propUrl}=getConfig();const data=await callApi(propUrl,"/v1/property/"+endpoint,body);resultEl.textContent=JSON.stringify(data,null,2)}catch(err){resultEl.textContent="Error: "+err.message}}
-    async function loadUsage(){const box=document.getElementById("usage-box");const{kycUrl,apiKey}=getConfig();if(!kycUrl){box.textContent="Set KYC API URL in Settings first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":apiKey}});const data=await res.json();if(data.success){const d=data.data;box.textContent=`Plan: ${d.plan}\nUsed: ${d.usedThisMonth} / ${d.monthlyLimit}\nRemaining: ${d.remaining}\nLast used: ${d.lastUsedAt||"—"}`;document.getElementById("stat-kyc").textContent=d.usedThisMonth;document.getElementById("stat-remaining").textContent=d.remaining;document.getElementById("stat-plan").textContent=d.plan;window._currentPlan=d.plan}else{box.textContent=data.error||"Failed"}}catch(err){box.textContent="Error: "+err.message}}
-    async function createKey(){const name=document.getElementById("new-key-name").value.trim();const plan=document.getElementById("new-key-plan").value;const resultEl=document.getElementById("key-result");resultEl.style.display="block";if(!name){resultEl.textContent="Name required";return}const{kycUrl}=getConfig();if(!kycUrl){resultEl.textContent="Set KYC API URL first.";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,plan})});const data=await res.json();resultEl.textContent=JSON.stringify(data,null,2);if(data.success&&data.data?.key)resultEl.textContent+="\n\n⚠️ Copy this key now – it will not be shown again."}catch(err){resultEl.textContent="Error: "+err.message}}
-    const PLAN_FEATURES={starter:["500 API calls / month","Email support","Basic rate limits"],growth:["2,000 API calls / month","Priority support","Higher rate limits"],business:["10,000 API calls / month","Dedicated support","Custom rate limits"],enterprise:["Unlimited calls","SLA + dedicated engineer","Custom integrations"]};
-    async function loadPlans(){const container=document.getElementById("plan-cards");container.innerHTML="<p style='color:var(--muted)'>Loading plans...</p>";const{kycUrl}=getConfig();if(!kycUrl){container.innerHTML="<p style='color:var(--muted)'>Set KYC API URL in Settings first.</p>";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/plans");const data=await res.json();if(!data.success)throw new Error(data.error||"Failed to load plans");const current=window._currentPlan||"growth";container.innerHTML=data.data.map(p=>{const isCurrent=p.name===current;const featured=p.name==="growth";return`<div class="plan-card ${featured?"featured":""}">${isCurrent?'<span class="badge-current">Current</span>':""}<div class="plan-name">${p.name}</div><div class="plan-price">${p.priceFormatted} <span>/mo</span></div><ul>${(PLAN_FEATURES[p.name]||[]).map(f=>`<li>${f}</li>`).join("")}</ul><button class="${isCurrent?"":"amber"}" ${isCurrent?"disabled":""} onclick="startUpgrade('${p.name}')">${isCurrent?"Current Plan":"Upgrade"}</button></div>`}).join("")}catch(err){container.innerHTML=`<p style='color:#ef4444'>Error: ${err.message}</p>`}}
-    async function startUpgrade(plan){const email=document.getElementById("billing-email").value.trim();const resultEl=document.getElementById("payment-result");if(!email){resultEl.textContent="Please enter your email first.";return}const{kycUrl,apiKey}=getConfig();if(!kycUrl){resultEl.textContent="Set KYC API URL in Settings first.";return}resultEl.textContent="Initializing Paystack payment...";try{const initRes=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({plan,email})});const initData=await initRes.json();if(!initData.success)throw new Error(initData.error||"Initialize failed");const{reference,authorization_url}=initData.data;localStorage.setItem("dt_pending_ref",reference);localStorage.setItem("dt_pending_plan",plan);resultEl.textContent=`Redirecting to Paystack...\nReference: ${reference}`;window.location.href=authorization_url}catch(err){resultEl.textContent="Error: "+err.message}}
-    async function handlePaymentCallback(){const params=new URLSearchParams(window.location.search);const reference=params.get("reference")||params.get("trxref")||localStorage.getItem("dt_pending_ref");const plan=localStorage.getItem("dt_pending_plan");if(!reference)return;document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));document.querySelector('[data-page="billing"]').classList.add("active");document.querySelectorAll("main > section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-billing").classList.remove("hidden");const resultEl=document.getElementById("payment-result");resultEl.textContent="Verifying payment with Paystack...";const{kycUrl,apiKey}=getConfig();try{const verifyRes=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/verify",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({reference,plan})});const verifyData=await verifyRes.json();if(verifyData.success){resultEl.textContent=`✅ Payment verified!\n\nNew plan: ${verifyData.data.plan}\nMonthly limit: ${verifyData.data.monthlyLimit}\nReference: ${verifyData.data.reference}\nPaid at: ${verifyData.data.paidAt||"—"}`;window._currentPlan=verifyData.data.plan;localStorage.removeItem("dt_pending_ref");localStorage.removeItem("dt_pending_plan");window.history.replaceState({},"",window.location.pathname);loadOverview();loadPlans()}else{resultEl.textContent="Verification failed: "+(verifyData.error||"Unknown error")}}catch(err){resultEl.textContent="Error verifying: "+err.message}}
-    if(window.location.search.includes("reference")||window.location.search.includes("trxref")||localStorage.getItem("dt_pending_ref")){setTimeout(handlePaymentCallback,300)}
-    function loadOverview(){loadUsage()}
+    document.querySelectorAll(".nav-item").forEach(item=>{item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));item.classList.add("active");const p=item.dataset.page;document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-"+p).classList.remove("hidden");if(p==="overview")loadOverview();if(p==="analytics")loadAnalytics();if(p==="keys")loadUsage();if(p==="billing")loadPlans()})});
+    async function callApi(base,path,body){const{apiKey}=getConfig();if(!base)throw new Error("Set API URL in Settings");const res=await fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify(body)});return res.json()}
+    async function runKyc(){const el=document.getElementById("kyc-result");el.style.display="block";el.textContent="Loading...";try{const body=JSON.parse(document.getElementById("kyc-body").value);const ep=document.getElementById("kyc-endpoint").value;const{kycUrl}=getConfig();const data=await callApi(kycUrl,"/v1/kyc/"+ep,body);el.textContent=JSON.stringify(data,null,2);loadOverview()}catch(e){el.textContent="Error: "+e.message}}
+    async function runProperty(){const el=document.getElementById("prop-result");el.style.display="block";el.textContent="Loading...";try{const body=JSON.parse(document.getElementById("prop-body").value);const ep=document.getElementById("prop-endpoint").value;const{propUrl}=getConfig();const data=await callApi(propUrl,"/v1/property/"+ep,body);el.textContent=JSON.stringify(data,null,2);loadOverview()}catch(e){el.textContent="Error: "+e.message}}
+    async function loadUsage(){const box=document.getElementById("usage-box");const{kycUrl,apiKey}=getConfig();if(!kycUrl){box.textContent="Set KYC URL in Settings";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":apiKey}});const data=await res.json();if(data.success){const d=data.data;box.textContent=`Plan: ${d.plan}\nUsed: ${d.usedThisMonth}/${d.monthlyLimit}\nRemaining: ${d.remaining}\nLast used: ${d.lastUsedAt||"—"}`;document.getElementById("stat-remaining").textContent=d.remaining;document.getElementById("stat-plan").textContent=d.plan;window._currentPlan=d.plan}else box.textContent=data.error||"Failed"}catch(e){box.textContent="Error: "+e.message}}
+    async function loadAnalytics(){const{kycUrl,apiKey}=getConfig();if(!kycUrl)return;try{const[sumRes,evtRes]=await Promise.all([fetch(kycUrl.replace(/\/$/,"")+"/v1/analytics/summary",{headers:{"X-API-Key":apiKey}}),fetch(kycUrl.replace(/\/$/,"")+"/v1/analytics/events?limit=30",{headers:{"X-API-Key":apiKey}})]);const sum=await sumRes.json();const evt=await evtRes.json();if(!sum.success)throw new Error(sum.error||"Failed");const d=sum.data;document.getElementById("stat-total").textContent=d.totalCalls;document.getElementById("stat-24h").textContent=d.last24h;document.getElementById("stat-ok").textContent=d.success;document.getElementById("stat-fail").textContent=d.failed;document.getElementById("stat-latency").textContent=d.avgLatencyMs+"ms";document.getElementById("a-total").textContent=d.totalCalls;document.getElementById("a-24").textContent=d.last24h;document.getElementById("a-lat").textContent=d.avgLatencyMs+"ms";document.getElementById("a-rate").textContent=d.totalCalls?(Math.round(d.success/d.totalCalls*100)+"%"):"—";const days=Object.keys(d.byDay||{}).sort();const dayVals=days.map(k=>d.byDay[k]);if(chartDay)chartDay.destroy();chartDay=new Chart(document.getElementById("chart-day"),{type:"line",data:{labels:days,datasets:[{label:"Calls",data:dayVals,borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.15)",fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"},beginAtZero:true}}});const eps=Object.keys(d.byEndpoint||{});const epVals=eps.map(k=>d.byEndpoint[k]);if(chartEp)chartEp.destroy();chartEp=new Chart(document.getElementById("chart-ep"),{type:"bar",data:{labels:eps.map(e=>e.replace(/^\/v1\//,"")),datasets:[{label:"Calls",data:epVals,backgroundColor:"#f59e0b"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"},beginAtZero:true}}});const tbody=document.getElementById("events-body");if(evt.success&&evt.data.length){tbody.innerHTML=evt.data.map(e=>`<tr><td>${new Date(e.timestamp).toLocaleString()}</td><td>${e.endpoint}</td><td class="${e.statusCode<400?"status-ok":"status-err"}">${e.statusCode}</td><td>${e.latencyMs}ms</td></tr>`).join("")}else tbody.innerHTML="<tr><td colspan='4' style='color:var(--muted)'>No events yet — make API calls</td></tr>"}catch(e){console.error(e)}}
+    async function createKey(){const name=document.getElementById("new-key-name").value.trim();const plan=document.getElementById("new-key-plan").value;const el=document.getElementById("key-result");el.style.display="block";if(!name){el.textContent="Name required";return}const{kycUrl}=getConfig();if(!kycUrl){el.textContent="Set KYC URL";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,plan})});const data=await res.json();el.textContent=JSON.stringify(data,null,2);if(data.success&&data.data?.key)el.textContent+="\n\n⚠️ Copy key now"}catch(e){el.textContent="Error: "+e.message}}
+    const PLAN_FEATURES={starter:["500 calls/mo","Email support"],growth:["2,000 calls/mo","Priority support"],business:["10,000 calls/mo","Dedicated support"],enterprise:["Unlimited","SLA"]};
+    async function loadPlans(){const c=document.getElementById("plan-cards");c.innerHTML="Loading...";const{kycUrl}=getConfig();if(!kycUrl){c.innerHTML="<p style='color:var(--muted)'>Set KYC URL in Settings</p>";return}try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/plans");const data=await res.json();if(!data.success)throw new Error(data.error);const cur=window._currentPlan||"growth";c.innerHTML=data.data.map(p=>{const is=p.name===cur;return`<div class="plan-card ${p.name==="growth"?"featured":""}">${is?'<span class="badge-current">Current</span>':""}<div class="plan-name">${p.name}</div><div class="plan-price">${p.priceFormatted} <span>/mo</span></div><ul>${(PLAN_FEATURES[p.name]||[]).map(f=>`<li>${f}</li>`).join("")}</ul><button class="${is?"":"amber"}" ${is?"disabled":""} onclick="startUpgrade('${p.name}')">${is?"Current":"Upgrade"}</button></div>`}).join("")}catch(e){c.innerHTML=`<p style="color:#ef4444">${e.message}</p>`}}
+    async function startUpgrade(plan){const email=document.getElementById("billing-email").value.trim();const el=document.getElementById("payment-result");if(!email){el.textContent="Enter email";return}const{kycUrl,apiKey}=getConfig();if(!kycUrl){el.textContent="Set KYC URL";return}el.textContent="Initializing Paystack...";try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({plan,email})});const data=await res.json();if(!data.success)throw new Error(data.error);localStorage.setItem("dt_pending_ref",data.data.reference);localStorage.setItem("dt_pending_plan",plan);el.textContent="Redirecting to Paystack...";window.location.href=data.data.authorization_url}catch(e){el.textContent="Error: "+e.message}}
+    async function handlePaymentCallback(){const params=new URLSearchParams(window.location.search);const reference=params.get("reference")||params.get("trxref")||localStorage.getItem("dt_pending_ref");const plan=localStorage.getItem("dt_pending_plan");if(!reference)return;document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));document.querySelector('[data-page="billing"]').classList.add("active");document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));document.getElementById("page-billing").classList.remove("hidden");const el=document.getElementById("payment-result");el.textContent="Verifying with Paystack...";const{kycUrl,apiKey}=getConfig();try{const res=await fetch(kycUrl.replace(/\/$/,"")+"/v1/payment/verify",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":apiKey},body:JSON.stringify({reference,plan})});const data=await res.json();if(data.success){el.textContent=`✅ Paid & upgraded\nPlan: ${data.data.plan}\nLimit: ${data.data.monthlyLimit}\nRef: ${data.data.reference}`;window._currentPlan=data.data.plan;localStorage.removeItem("dt_pending_ref");localStorage.removeItem("dt_pending_plan");window.history.replaceState({},"",window.location.pathname);loadOverview()}else el.textContent="Failed: "+(data.error||"")}catch(e){el.textContent="Error: "+e.message}}
+    if(window.location.search.includes("reference")||window.location.search.includes("trxref")||localStorage.getItem("dt_pending_ref"))setTimeout(handlePaymentCallback,300);
+    function loadOverview(){loadUsage();loadAnalytics().catch(()=>{})}
     loadOverview();
+    setInterval(()=>{if(!document.getElementById("page-overview").classList.contains("hidden")||!document.getElementById("page-analytics").classList.contains("hidden"))loadAnalytics().catch(()=>{})},30000);
   </script>
 </body>
 </html>
