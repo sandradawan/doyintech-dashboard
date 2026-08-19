@@ -1,0 +1,13 @@
+{
+  "name": "doyintech-dashboard",
+  "version": "1.0.0",
+  "description": "DoyinTech API Dashboard – KYC + Property AI",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve -l 3000 public",
+    "start": "npx serve -l 3000 public"
+  },
+  "dependencies": {
+    "serve": "^14.2.3"
+  }
+}
