@@ -9,10 +9,10 @@
 :root{--bg:#07071a;--sidebar:#0d0d24;--card:#12122e;--border:#1c1c3a;--blue:#3b82f6;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
-.sidebar{width:240px;background:var(--sidebar);border-right:1px solid var(--border);padding:1.5rem 1rem;position:fixed;height:100vh;z-index:10}
+.sidebar{width:240px;background:var(--sidebar);border-right:1px solid var(--border);padding:1.5rem 1rem;position:fixed;height:100vh;z-index:10;overflow-y:auto}
 .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.15rem;margin-bottom:2rem;padding:0 .5rem}
 .logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a0a1a}
-.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem;border-radius:10px;color:var(--muted);cursor:pointer;margin-bottom:.3rem;font-size:.95rem;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem;border-radius:10px;color:var(--muted);cursor:pointer;margin-bottom:.3rem;font-size:.95rem;font-weight:500;user-select:none}
 .nav-item:hover,.nav-item.active{background:rgba(59,130,246,.15);color:#60a5fa}
 .main{margin-left:240px;flex:1;padding:2rem;max-width:1100px}
 h1{font-size:1.6rem;font-weight:700;margin-bottom:.3rem}
@@ -50,24 +50,26 @@ th{color:var(--muted)}
 .status-ok{color:var(--green)}.status-err{color:var(--red)}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.banner{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.8rem 1rem;margin-bottom:1.2rem;font-size:.9rem;color:#fbbf24}
 @media(max-width:800px){.sidebar{width:70px}.sidebar .logo span,.nav-item span:last-child{display:none}.main{margin-left:70px;padding:1rem}.config-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="logo"><div class="logo-icon">D</div><span>DoyinTech</span></div>
-  <div class="nav-item active" data-page="overview"><span>1.</span><span>Overview</span></div>
-  <div class="nav-item" data-page="analytics"><span>2.</span><span>Analytics</span></div>
-  <div class="nav-item" data-page="kyc"><span>3.</span><span>KYC API</span></div>
-  <div class="nav-item" data-page="property"><span>4.</span><span>Property AI</span></div>
-  <div class="nav-item" data-page="keys"><span>5.</span><span>API Keys</span></div>
-  <div class="nav-item" data-page="billing"><span>6.</span><span>Upgrade Plan</span></div>
-  <div class="nav-item" data-page="settings"><span>7.</span><span>Settings</span></div>
+  <div class="nav-item active" data-page="overview"><span>📊</span><span>Overview</span></div>
+  <div class="nav-item" data-page="analytics"><span>📈</span><span>Analytics</span></div>
+  <div class="nav-item" data-page="kyc"><span>🪪</span><span>KYC API</span></div>
+  <div class="nav-item" data-page="property"><span>🏡</span><span>Property AI</span></div>
+  <div class="nav-item" data-page="keys"><span>🔑</span><span>API Keys</span></div>
+  <div class="nav-item" data-page="billing"><span>💳</span><span>Upgrade Plan</span></div>
+  <div class="nav-item" data-page="settings"><span>⚙️</span><span>Settings</span></div>
 </aside>
 <main class="main">
 <section id="page-overview">
   <h1><span class="live-dot"></span>Dashboard</h1>
   <p class="subtitle">Real-time API usage</p>
+  <div id="setup-banner" class="banner hidden">API URLs not set. Open <b>Settings</b>, paste your deployed API URLs, then Save.</div>
   <div class="cards">
     <div class="stat-card"><div class="label">Total Calls</div><div class="value blue" id="stat-total">—</div></div>
     <div class="stat-card"><div class="label">Last 24h</div><div class="value amber" id="stat-24h">—</div></div>
@@ -77,7 +79,7 @@ th{color:var(--muted)}
     <div class="stat-card"><div class="label">Quota Left</div><div class="value green" id="stat-remaining">—</div></div>
     <div class="stat-card"><div class="label">Plan</div><div class="value" id="stat-plan">—</div></div>
   </div>
-  <div class="panel"><h2>Getting started</h2><p style="color:var(--muted);line-height:1.6">1. Open <b>Settings</b> and set your API URLs<br>2. Try <b>KYC API</b> or <b>Property AI</b><br>3. Check <b>Analytics</b></p></div>
+  <div class="panel"><h2>Getting started</h2><p style="color:var(--muted);line-height:1.7">1. Open <b>Settings</b> → paste API URLs → Save<br>2. Default key: <code>dev-key-123</code><br>3. Test <b>KYC API</b> or <b>Property AI</b><br>4. Check <b>Analytics</b></p></div>
 </section>
 <section id="page-analytics" class="hidden">
   <h1>Analytics</h1>
@@ -142,15 +144,51 @@ th{color:var(--muted)}
   <h1>Settings</h1>
   <div class="panel">
     <label>KYC API Base URL</label>
-    <input id="kyc-url" placeholder="https://your-kyc-api.example.com"/>
+    <input id="kyc-url" placeholder="https://your-kyc-api.up.railway.app"/>
     <label>Property AI API Base URL</label>
-    <input id="prop-url" placeholder="https://your-property-api.example.com"/>
+    <input id="prop-url" placeholder="https://your-property-api.up.railway.app"/>
     <label>API Key</label>
     <input id="api-key" placeholder="dev-key-123"/>
     <button id="btn-save">Save Settings</button>
   </div>
 </section>
 </main>
-<script src="app.js"></script>
+<script>
+(function(){
+"use strict";
+function getConfig(){return{kycUrl:localStorage.getItem("dt_kyc_url")||"",propUrl:localStorage.getItem("dt_prop_url")||"",apiKey:localStorage.getItem("dt_api_key")||"dev-key-123"};}
+function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=String(val);}
+function showPage(page){
+var items=document.querySelectorAll(".nav-item");
+for(var i=0;i<items.length;i++)items[i].classList.remove("active");
+var active=document.querySelector('.nav-item[data-page="'+page+'"]');
+if(active)active.classList.add("active");
+var sections=document.querySelectorAll("main > section");
+for(var j=0;j<sections.length;j++)sections[j].classList.add("hidden");
+var el=document.getElementById("page-"+page);
+if(!el){console.error("Missing page",page);return;}
+el.classList.remove("hidden");
+if(page==="overview")loadOverview();
+if(page==="analytics")loadAnalytics();
+if(page==="keys")loadUsage();
+if(page==="billing")loadPlans();
+}
+window.showPage=showPage;
+function updateBanner(){var b=document.getElementById("setup-banner");if(!b)return;var c=getConfig();if(!c.kycUrl)b.classList.remove("hidden");else b.classList.add("hidden");}
+function saveSettings(){localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());alert("Settings saved");updateBanner();loadOverview();}
+function callApi(base,path,body){var c=getConfig();if(!base)return Promise.reject(new Error("Set API URL in Settings first"));return fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify(body)}).then(function(res){return res.json();});}
+function runKyc(){var el=document.getElementById("kyc-result");el.style.display="block";el.textContent="Loading...";var body;try{body=JSON.parse(document.getElementById("kyc-body").value);}catch(e){el.textContent="Invalid JSON";return;}callApi(getConfig().kycUrl,"/v1/kyc/"+document.getElementById("kyc-endpoint").value,body).then(function(data){el.textContent=JSON.stringify(data,null,2);loadOverview();}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runProperty(){var el=document.getElementById("prop-result");el.style.display="block";el.textContent="Loading...";var body;try{body=JSON.parse(document.getElementById("prop-body").value);}catch(e){el.textContent="Invalid JSON";return;}callApi(getConfig().propUrl,"/v1/property/"+document.getElementById("prop-endpoint").value,body).then(function(data){el.textContent=JSON.stringify(data,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function loadUsage(){var box=document.getElementById("usage-box");if(!box)return;var c=getConfig();if(!c.kycUrl){box.textContent="Set KYC URL in Settings";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){if(data.success){var d=data.data;box.textContent="Plan: "+d.plan+"\nUsed: "+d.usedThisMonth+"/"+d.monthlyLimit+"\nRemaining: "+d.remaining;setText("stat-remaining",d.remaining);setText("stat-plan",d.plan);window._currentPlan=d.plan;}else box.textContent=data.error||"Failed";}).catch(function(e){box.textContent="Error: "+e.message;});}
+function loadAnalytics(){var c=getConfig();if(!c.kycUrl)return;Promise.all([fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/summary",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}),fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/events?limit=30",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();})]).then(function(results){var sum=results[0],evt=results[1];if(!sum.success)return;var d=sum.data;setText("stat-total",d.totalCalls);setText("stat-24h",d.last24h);setText("stat-ok",d.success);setText("stat-fail",d.failed);setText("stat-latency",d.avgLatencyMs+"ms");setText("a-total",d.totalCalls);setText("a-24",d.last24h);setText("a-lat",d.avgLatencyMs+"ms");setText("a-rate",d.totalCalls?Math.round(d.success/d.totalCalls*100)+"%":"—");var epList=document.getElementById("endpoint-list");if(epList){var eps=d.byEndpoint||{};var keys=Object.keys(eps);epList.textContent=keys.length?keys.map(function(k){return k+": "+eps[k];}).join("\n"):"No data yet";}var tbody=document.getElementById("events-body");if(tbody){if(evt.success&&evt.data&&evt.data.length){tbody.innerHTML=evt.data.map(function(e){var cls=e.statusCode<400?"status-ok":"status-err";return "<tr><td>"+new Date(e.timestamp).toLocaleString()+"</td><td>"+e.endpoint+"</td><td class=\""+cls+"\">"+e.statusCode+"</td><td>"+e.latencyMs+"ms</td></tr>";}).join("");}else{tbody.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--muted)\">No events yet</td></tr>";}}}).catch(function(e){console.error(e);});}
+function createKey(){var name=document.getElementById("new-key-name").value.trim();var plan=document.getElementById("new-key-plan").value;var el=document.getElementById("key-result");el.style.display="block";if(!name){el.textContent="Name required";return;}var c=getConfig();if(!c.kycUrl){el.textContent="Set KYC URL in Settings";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,plan:plan})}).then(function(r){return r.json();}).then(function(data){el.textContent=JSON.stringify(data,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+var PLAN_FEATURES={starter:["500 calls/mo"],growth:["2000 calls/mo"],business:["10000 calls/mo"],enterprise:["Unlimited"]};
+function loadPlans(){var container=document.getElementById("plan-cards");if(!container)return;container.innerHTML="Loading...";var c=getConfig();if(!c.kycUrl){container.innerHTML="<p style=\"color:var(--muted)\">Set KYC URL in Settings</p>";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/plans").then(function(r){return r.json();}).then(function(data){if(!data.success)throw new Error(data.error||"Failed");var cur=window._currentPlan||"growth";container.innerHTML=data.data.map(function(p){var is=p.name===cur;var feats=(PLAN_FEATURES[p.name]||[]).map(function(f){return "<li>"+f+"</li>";}).join("");return "<div class=\"plan-card"+(p.name==="growth"?" featured":"")+"\">"+(is?"<span class=\"badge-current\">Current</span>":"")+"<div class=\"plan-name\">"+p.name+"</div><div class=\"plan-price\">"+p.priceFormatted+" <span>/mo</span></div><ul>"+feats+"</ul><button class=\""+(is?"":"amber")+"\" data-plan=\""+p.name+"\" "+(is?"disabled":"")+">"+(is?"Current":"Upgrade")+"</button></div>";}).join("");var btns=container.querySelectorAll("button[data-plan]");for(var i=0;i<btns.length;i++){btns[i].addEventListener("click",function(ev){var plan=ev.currentTarget.getAttribute("data-plan");if(plan)startUpgrade(plan);});}}).catch(function(e){container.innerHTML="<p style=\"color:#ef4444\">"+e.message+"</p>";});}
+function startUpgrade(plan){var email=document.getElementById("billing-email").value.trim();var el=document.getElementById("payment-result");if(!email){el.textContent="Enter email first";return;}var c=getConfig();if(!c.kycUrl){el.textContent="Set KYC URL";return;}el.textContent="Initializing Paystack...";fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({plan:plan,email:email})}).then(function(r){return r.json();}).then(function(data){if(!data.success)throw new Error(data.error||"Failed");localStorage.setItem("dt_pending_ref",data.data.reference);localStorage.setItem("dt_pending_plan",plan);window.location.href=data.data.authorization_url;}).catch(function(e){el.textContent="Error: "+e.message;});}
+function loadOverview(){updateBanner();loadUsage();loadAnalytics();}
+function initApp(){console.log("DoyinTech Dashboard init");var kyc=document.getElementById("kyc-url");var prop=document.getElementById("prop-url");var key=document.getElementById("api-key");if(kyc)kyc.value=localStorage.getItem("dt_kyc_url")||"";if(prop)prop.value=localStorage.getItem("dt_prop_url")||"";if(key)key.value=localStorage.getItem("dt_api_key")||"dev-key-123";var navItems=document.querySelectorAll(".nav-item");for(var i=0;i<navItems.length;i++){(function(item){item.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();var page=item.getAttribute("data-page");if(page)showPage(page);});})(navItems[i]);}function on(id,fn){var el=document.getElementById(id);if(el)el.addEventListener("click",fn);}on("btn-save",saveSettings);on("btn-kyc",runKyc);on("btn-prop",runProperty);on("btn-create-key",createKey);on("btn-usage",loadUsage);on("btn-refresh-analytics",loadAnalytics);showPage("overview");console.log("DoyinTech Dashboard ready");}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",initApp);}else{initApp();}
+})();
+</script>
 </body>
 </html>
