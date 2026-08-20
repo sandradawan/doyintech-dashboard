@@ -1,365 +1,84 @@
 (function(){
 "use strict";
-var chartDay=null, chartOv=null, snipLang="curl";
-
-function getConfig(){
-  return {
-    kycUrl: localStorage.getItem("dt_kyc_url")||"",
-    propUrl: localStorage.getItem("dt_prop_url")||"",
-    apiKey: localStorage.getItem("dt_api_key")||"dev-key-123"
-  };
-}
+var chartDay=null,chartOv=null,snipLang="curl";
+function getConfig(){return{kycUrl:localStorage.getItem("dt_kyc_url")||"",propUrl:localStorage.getItem("dt_prop_url")||"",waUrl:localStorage.getItem("dt_wa_url")||"",learnUrl:localStorage.getItem("dt_learn_url")||"",apiKey:localStorage.getItem("dt_api_key")||"dev-key-123"};}
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=String(v);}
 function showPage(page){
-  document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
-  var a=document.querySelector('.nav-item[data-page="'+page+'"]');
-  if(a)a.classList.add("active");
-  document.querySelectorAll("main>section").forEach(function(s){s.classList.add("hidden");});
-  var el=document.getElementById("page-"+page);
-  if(!el)return;
-  el.classList.remove("hidden");
-  if(page==="overview")loadOverview();
-  if(page==="analytics")loadAnalytics();
-  if(page==="keys"){loadUsage();listKeys();}
-  if(page==="billing"){loadPlans();loadBillingHistory();}
-  if(page==="snippets")renderSnippet();
-  if(page==="webhooks")loadWebhook();
+document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
+var a=document.querySelector('.nav-item[data-page="'+page+'"]');if(a)a.classList.add("active");
+document.querySelectorAll("main>section").forEach(function(s){s.classList.add("hidden");});
+var el=document.getElementById("page-"+page);if(!el)return;el.classList.remove("hidden");
+if(page==="overview")loadOverview();
+if(page==="analytics")loadAnalytics();
+if(page==="keys"){loadUsage();listKeys();}
+if(page==="billing"){loadPlans();loadBillingHistory();}
+if(page==="snippets")renderSnippet();
+if(page==="webhooks")loadWebhook();
 }
 window.showPage=showPage;
-
-function updateBanner(){
-  var b=document.getElementById("setup-banner");
-  if(!b)return;
-  if(!getConfig().kycUrl)b.classList.remove("hidden");else b.classList.add("hidden");
-}
-function markCheck(id,done){
-  var el=document.getElementById(id);
-  if(!el)return;
-  if(done){el.classList.add("done");el.querySelector(".box").textContent="\u2713";}
-  else{el.classList.remove("done");el.querySelector(".box").textContent="";}
-}
-function updateOnboarding(hasCall){
-  var c=getConfig();
-  markCheck("chk-url",!!c.kycUrl);
-  markCheck("chk-key",!!c.apiKey);
-  markCheck("chk-call",!!hasCall || (localStorage.getItem("dt_first_call")==="1"));
-  markCheck("chk-upgrade", (window._currentPlan && window._currentPlan!=="starter"));
-}
-
+function updateBanner(){var b=document.getElementById("setup-banner");if(!b)return;if(!getConfig().kycUrl)b.classList.remove("hidden");else b.classList.add("hidden");}
+function markCheck(id,done){var el=document.getElementById(id);if(!el)return;if(done){el.classList.add("done");el.querySelector(".box").textContent="\u2713";}else{el.classList.remove("done");el.querySelector(".box").textContent="";}}
+function updateOnboarding(hasCall){var c=getConfig();markCheck("chk-url",!!c.kycUrl);markCheck("chk-key",!!c.apiKey);markCheck("chk-call",!!hasCall||localStorage.getItem("dt_first_call")==="1");markCheck("chk-upgrade",window._currentPlan&&window._currentPlan!=="starter");}
 function saveSettings(){
-  localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());
-  localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());
-  localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());
-  alert("Settings saved");
-  updateBanner();
-  loadOverview();
+localStorage.setItem("dt_kyc_url",document.getElementById("kyc-url").value.trim());
+localStorage.setItem("dt_prop_url",document.getElementById("prop-url").value.trim());
+var wa=document.getElementById("wa-url");if(wa)localStorage.setItem("dt_wa_url",wa.value.trim());
+var ln=document.getElementById("learn-url");if(ln)localStorage.setItem("dt_learn_url",ln.value.trim());
+localStorage.setItem("dt_api_key",document.getElementById("api-key").value.trim());
+alert("Settings saved");updateBanner();loadOverview();
 }
-
 function checkHealth(){
-  var c=getConfig();
-  function setDot(id,hl,ok){
-    var d=document.getElementById(id), h=document.getElementById(hl);
-    if(!d||!h)return;
-    d.className="dot "+(ok===true?"up":ok===false?"down":"unk");
-    h.textContent=ok===true?"UP":ok===false?"DOWN":"\u2014";
-    h.style.color=ok===true?"var(--green)":ok===false?"var(--red)":"var(--muted)";
-  }
-  if(c.kycUrl){
-    fetch(c.kycUrl.replace(/\/$/,"")+"/health").then(function(r){return r.json();})
-      .then(function(d){setDot("dot-kyc","hl-kyc",!!d.success||d.status==="healthy");markCheck("chk-health",true);})
-      .catch(function(){setDot("dot-kyc","hl-kyc",false);markCheck("chk-health",false);});
-  } else setDot("dot-kyc","hl-kyc",null);
-  if(c.propUrl){
-    fetch(c.propUrl.replace(/\/$/,"")+"/health").then(function(r){return r.json();})
-      .then(function(d){setDot("dot-prop","hl-prop",!!d.success||d.status==="healthy");})
-      .catch(function(){setDot("dot-prop","hl-prop",false);});
-  } else setDot("dot-prop","hl-prop",null);
+var c=getConfig();
+function setDot(id,hl,ok){var d=document.getElementById(id),h=document.getElementById(hl);if(!d||!h)return;d.className="dot "+(ok===true?"up":ok===false?"down":"unk");h.textContent=ok===true?"UP":ok===false?"DOWN":"—";h.style.color=ok===true?"var(--green)":ok===false?"var(--red)":"var(--muted)";}
+function ping(url,dot,hl,onOk){if(!url){setDot(dot,hl,null);return;}fetch(url.replace(/\/$/,"")+"/health").then(function(r){return r.json();}).then(function(d){var ok=!!d.success||d.status==="healthy";setDot(dot,hl,ok);if(onOk)onOk(ok);}).catch(function(){setDot(dot,hl,false);if(onOk)onOk(false);});}
+ping(c.kycUrl,"dot-kyc","hl-kyc",function(ok){markCheck("chk-health",ok);});
+ping(c.propUrl,"dot-prop","hl-prop");
+ping(c.waUrl,"dot-wa","hl-wa");
+ping(c.learnUrl,"dot-learn","hl-learn");
 }
-
-function callApi(base,path,body){
-  var c=getConfig();
-  if(!base)return Promise.reject(new Error("Set API URL in Settings"));
-  return fetch(base.replace(/\/$/,"")+path,{
-    method:"POST",
-    headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},
-    body:JSON.stringify(body)
-  }).then(function(r){return r.json();});
-}
-
-function runKyc(){
-  var el=document.getElementById("kyc-result");
-  el.style.display="block";el.textContent="Loading...";
-  var body;try{body=JSON.parse(document.getElementById("kyc-body").value);}catch(e){el.textContent="Invalid JSON";return;}
-  callApi(getConfig().kycUrl,"/v1/kyc/"+document.getElementById("kyc-endpoint").value,body)
-    .then(function(data){el.textContent=JSON.stringify(data,null,2);localStorage.setItem("dt_first_call","1");loadOverview();})
-    .catch(function(e){el.textContent="Error: "+e.message;});
-}
-function runProperty(){
-  var el=document.getElementById("prop-result");
-  el.style.display="block";el.textContent="Loading...";
-  var body;try{body=JSON.parse(document.getElementById("prop-body").value);}catch(e){el.textContent="Invalid JSON";return;}
-  callApi(getConfig().propUrl,"/v1/property/"+document.getElementById("prop-endpoint").value,body)
-    .then(function(data){el.textContent=JSON.stringify(data,null,2);localStorage.setItem("dt_first_call","1");})
-    .catch(function(e){el.textContent="Error: "+e.message;});
-}
-
-function loadUsage(){
-  var box=document.getElementById("usage-box");
-  var c=getConfig();
-  if(!c.kycUrl){if(box)box.textContent="Set KYC URL in Settings";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":c.apiKey}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.success){
-        var d=data.data;
-        if(box)box.textContent="Plan: "+d.plan+"\nUsed: "+d.usedThisMonth+"/"+d.monthlyLimit+"\nRemaining: "+d.remaining;
-        setText("stat-remaining",d.remaining);
-        setText("stat-plan",d.plan);
-        window._currentPlan=d.plan;
-        updateOnboarding(d.usedThisMonth>0);
-      } else if(box) box.textContent=data.error||"Failed";
-    }).catch(function(e){if(box)box.textContent="Error: "+e.message;});
-}
-
-function drawChart(canvasId, labels, values, color){
-  if(typeof Chart==="undefined")return;
-  var canvas=document.getElementById(canvasId);
-  if(!canvas)return;
-  var existing = canvasId==="chart-day"?chartDay:chartOv;
-  if(existing)existing.destroy();
-  var ch=new Chart(canvas,{
-    type:"line",
-    data:{labels:labels,datasets:[{data:values,borderColor:color,backgroundColor:"rgba(59,130,246,0.15)",fill:true,tension:0.3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:"#94a3b8",maxTicks:8},grid:{color:"#1c1c3a"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"},beginAtZero:true}}}
-  });
-  if(canvasId==="chart-day")chartDay=ch;else chartOv=ch;
-}
-
-function loadAnalytics(){
-  var c=getConfig();
-  if(!c.kycUrl)return;
-  Promise.all([
-    fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/summary",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}),
-    fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/events?limit=30",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();})
-  ]).then(function(results){
-    var sum=results[0],evt=results[1];
-    if(!sum.success)return;
-    var d=sum.data;
-    setText("stat-total",d.totalCalls);setText("stat-24h",d.last24h);setText("stat-ok",d.success);setText("stat-fail",d.failed);
-    setText("stat-latency",d.avgLatencyMs+"ms");
-    setText("a-total",d.totalCalls);setText("a-24",d.last24h);setText("a-lat",d.avgLatencyMs+"ms");
-    setText("a-rate",d.totalCalls?Math.round(d.success/d.totalCalls*100)+"%":"\u2014");
-    var days=Object.keys(d.byDay||{}).sort();
-    var vals=days.map(function(k){return d.byDay[k];});
-    drawChart("chart-day",days,vals,"#3b82f6");
-    drawChart("chart-overview",days,vals,"#f59e0b");
-    var epList=document.getElementById("endpoint-list");
-    if(epList){
-      var eps=d.byEndpoint||{}, keys=Object.keys(eps);
-      epList.textContent=keys.length?keys.map(function(k){return k+": "+eps[k];}).join("\n"):"No data yet";
-    }
-    var tbody=document.getElementById("events-body");
-    if(tbody){
-      if(evt.success&&evt.data&&evt.data.length){
-        tbody.innerHTML=evt.data.map(function(e){
-          var cls=e.statusCode<400?"status-ok":"status-err";
-          return "<tr><td>"+new Date(e.timestamp).toLocaleString()+"</td><td>"+e.endpoint+"</td><td class=\""+cls+"\">"+e.statusCode+"</td><td>"+e.latencyMs+"ms</td></tr>";
-        }).join("");
-      } else tbody.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--muted)\">No events yet</td></tr>";
-    }
-    if(d.totalCalls>0)localStorage.setItem("dt_first_call","1");
-    updateOnboarding(d.totalCalls>0);
-  }).catch(function(e){console.error(e);});
-}
-
-function listKeys(){
-  var c=getConfig();
-  var tbody=document.getElementById("keys-body");
-  if(!tbody)return;
-  if(!c.kycUrl){tbody.innerHTML="<tr><td colspan=\"6\">Set KYC URL</td></tr>";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/list",{headers:{"X-API-Key":c.apiKey}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.success||!data.data.length){tbody.innerHTML="<tr><td colspan=\"6\">No keys</td></tr>";return;}
-      tbody.innerHTML=data.data.map(function(k){
-        return "<tr><td>"+k.name+"</td><td>"+k.keyPreview+"</td><td>"+k.plan+"</td><td>"+k.usedThisMonth+"/"+k.monthlyLimit+
-          "</td><td class=\""+(k.active?"status-ok":"status-err")+"\">"+(k.active?"Active":"Revoked")+
-          "</td><td>"+(k.active?
-            "<button class=\"danger\" style=\"padding:.3rem .6rem;font-size:.75rem\" data-revoke=\""+k.id+"\">Revoke</button>":
-            "<button style=\"padding:.3rem .6rem;font-size:.75rem\" data-activate=\""+k.id+"\">Activate</button>")+
-          "</td></tr>";
-      }).join("");
-      tbody.querySelectorAll("[data-revoke]").forEach(function(btn){
-        btn.addEventListener("click",function(){revokeKey(btn.getAttribute("data-revoke"));});
-      });
-      tbody.querySelectorAll("[data-activate]").forEach(function(btn){
-        btn.addEventListener("click",function(){activateKey(btn.getAttribute("data-activate"));});
-      });
-    }).catch(function(e){tbody.innerHTML="<tr><td colspan=\"6\">Error: "+e.message+"</td></tr>";});
-}
-function revokeKey(keyId){
-  var c=getConfig();
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/revoke",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({keyId:keyId})})
-    .then(function(r){return r.json();}).then(function(){listKeys();}).catch(function(e){alert(e.message);});
-}
-function activateKey(keyId){
-  var c=getConfig();
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/activate",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({keyId:keyId})})
-    .then(function(r){return r.json();}).then(function(){listKeys();}).catch(function(e){alert(e.message);});
-}
-function createKey(){
-  var name=document.getElementById("new-key-name").value.trim();
-  var plan=document.getElementById("new-key-plan").value;
-  var el=document.getElementById("key-result");
-  el.style.display="block";
-  if(!name){el.textContent="Name required";return;}
-  var c=getConfig();
-  if(!c.kycUrl){el.textContent="Set KYC URL";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,plan:plan})})
-    .then(function(r){return r.json();})
-    .then(function(data){el.textContent=JSON.stringify(data,null,2)+(data.success?"\n\nCopy key now":"");listKeys();})
-    .catch(function(e){el.textContent="Error: "+e.message;});
-}
-
-function renderSnippet(){
-  var c=getConfig();
-  var base=c.kycUrl||"https://YOUR_KYC_API";
-  var key=c.apiKey||"dev-key-123";
-  var ep=document.getElementById("snip-endpoint").value;
-  var path="/v1/kyc/bvn", body='{"bvn":"12345678901","firstName":"Adebayo","lastName":"Okafor"}';
-  if(ep==="kyc-nin"){path="/v1/kyc/nin";body='{"nin":"12345678901","firstName":"Chioma","lastName":"Nwosu"}';}
-  if(ep==="prop-desc"){base=c.propUrl||"https://YOUR_PROPERTY_API";path="/v1/property/generate-description";body='{"location":"Lekki","propertyType":"apartment","bedrooms":3,"tone":"luxury"}';}
-  if(ep==="keys-me"){path="/v1/keys/me";body=null;}
-  var text="";
-  if(snipLang==="curl"){
-    if(body) text="curl -X POST '"+base+path+"' \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-API-Key: "+key+"' \\\n  -d '"+body+"'";
-    else text="curl '"+base+path+"' \\\n  -H 'X-API-Key: "+key+"'";
-  } else if(snipLang==="js"){
-    if(body) text="const res = await fetch('"+base+path+"', {\n  method: 'POST',\n  headers: {\n    'Content-Type': 'application/json',\n    'X-API-Key': '"+key+"'\n  },\n  body: JSON.stringify("+body+")\n});\nconst data = await res.json();";
-    else text="const res = await fetch('"+base+path+"', {\n  headers: { 'X-API-Key': '"+key+"' }\n});\nconst data = await res.json();";
-  } else {
-    if(body) text="import requests\n\nres = requests.post(\n  '"+base+path+"',\n  headers={'X-API-Key': '"+key+"'},\n  json="+body.replace(/\"/g,"'")+"\n)\nprint(res.json())";
-    else text="import requests\n\nres = requests.get(\n  '"+base+path+"',\n  headers={'X-API-Key': '"+key+"'}\n)\nprint(res.json())";
-  }
-  document.getElementById("snippet-box").textContent=text;
-}
-
-function loadWebhook(){
-  var c=getConfig();
-  var el=document.getElementById("wh-result");
-  if(!c.kycUrl){el.textContent="Set KYC URL in Settings";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{headers:{"X-API-Key":c.apiKey}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.success&&data.data){
-        document.getElementById("wh-url").value=data.data.url||"";
-        el.textContent="Active webhook\nURL: "+data.data.url+"\nSecret: "+data.data.secret+"\nEvents: "+(data.data.events||[]).join(", ");
-      } else el.textContent="No webhook configured";
-    }).catch(function(e){el.textContent="Error: "+e.message;});
-}
-function saveWebhook(){
-  var c=getConfig();
-  var el=document.getElementById("wh-result");
-  var url=document.getElementById("wh-url").value.trim();
-  var events=[];
-  if(document.getElementById("wh-ev1").checked)events.push("kyc.completed");
-  if(document.getElementById("wh-ev2").checked)events.push("kyc.failed");
-  if(!url){el.textContent="URL required";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({url:url,events:events})})
-    .then(function(r){return r.json();})
-    .then(function(data){el.textContent=JSON.stringify(data,null,2);})
-    .catch(function(e){el.textContent="Error: "+e.message;});
-}
-function deleteWebhook(){
-  var c=getConfig();
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{method:"DELETE",headers:{"X-API-Key":c.apiKey}})
-    .then(function(r){return r.json();})
-    .then(function(data){document.getElementById("wh-result").textContent=data.message||"Removed";document.getElementById("wh-url").value="";})
-    .catch(function(e){document.getElementById("wh-result").textContent=e.message;});
-}
-
+function callApi(base,path,body){var c=getConfig();if(!base)return Promise.reject(new Error("Set API URL in Settings"));return fetch(base.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+function runKyc(){var el=document.getElementById("kyc-result");el.style.display="block";el.textContent="Loading...";var body;try{body=JSON.parse(document.getElementById("kyc-body").value);}catch(e){el.textContent="Invalid JSON";return;}callApi(getConfig().kycUrl,"/v1/kyc/"+document.getElementById("kyc-endpoint").value,body).then(function(data){el.textContent=JSON.stringify(data,null,2);localStorage.setItem("dt_first_call","1");loadOverview();}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runProperty(){var el=document.getElementById("prop-result");el.style.display="block";el.textContent="Loading...";var body;try{body=JSON.parse(document.getElementById("prop-body").value);}catch(e){el.textContent="Invalid JSON";return;}callApi(getConfig().propUrl,"/v1/property/"+document.getElementById("prop-endpoint").value,body).then(function(data){el.textContent=JSON.stringify(data,null,2);localStorage.setItem("dt_first_call","1");}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runWaSend(){var el=document.getElementById("wa-send-result");el.style.display="block";el.textContent="Loading...";var c=getConfig();if(!c.waUrl){el.textContent="Set WhatsApp API URL in Settings";return;}fetch(c.waUrl.replace(/\/$/,"")+"/v1/whatsapp/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:document.getElementById("wa-to").value.trim(),message:document.getElementById("wa-message").value})}).then(function(r){return r.json();}).then(function(d){el.textContent=JSON.stringify(d,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runWaReply(){var el=document.getElementById("wa-reply-result");el.style.display="block";el.textContent="Loading...";var c=getConfig();if(!c.waUrl){el.textContent="Set WhatsApp API URL in Settings";return;}fetch(c.waUrl.replace(/\/$/,"")+"/v1/whatsapp/auto-reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:document.getElementById("wa-incoming").value,businessContext:document.getElementById("wa-context").value})}).then(function(r){return r.json();}).then(function(d){el.textContent=JSON.stringify(d,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runLearnLesson(){var el=document.getElementById("learn-lesson-result");el.style.display="block";el.textContent="Loading...";var c=getConfig();if(!c.learnUrl){el.textContent="Set Learn API URL in Settings";return;}fetch(c.learnUrl.replace(/\/$/,"")+"/v1/learn/lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:document.getElementById("learn-topic").value,subject:document.getElementById("learn-subject").value,classLevel:document.getElementById("learn-class").value,age:Number(document.getElementById("learn-age").value)||10})}).then(function(r){return r.json();}).then(function(d){el.textContent=JSON.stringify(d,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runLearnQuiz(){var el=document.getElementById("learn-quiz-result");el.style.display="block";el.textContent="Loading...";var c=getConfig();if(!c.learnUrl){el.textContent="Set Learn API URL in Settings";return;}fetch(c.learnUrl.replace(/\/$/,"")+"/v1/learn/quiz",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:document.getElementById("quiz-topic").value,classLevel:document.getElementById("quiz-class").value,count:5})}).then(function(r){return r.json();}).then(function(d){el.textContent=JSON.stringify(d,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function runLearnTutor(){var el=document.getElementById("learn-tutor-result");el.style.display="block";el.textContent="Loading...";var c=getConfig();if(!c.learnUrl){el.textContent="Set Learn API URL in Settings";return;}fetch(c.learnUrl.replace(/\/$/,"")+"/v1/learn/tutor",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:document.getElementById("tutor-msg").value,age:10,subject:"General"})}).then(function(r){return r.json();}).then(function(d){el.textContent=JSON.stringify(d,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function loadUsage(){var box=document.getElementById("usage-box");var c=getConfig();if(!c.kycUrl){if(box)box.textContent="Set KYC URL in Settings";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/me",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){if(data.success){var d=data.data;if(box)box.textContent="Plan: "+d.plan+"\nUsed: "+d.usedThisMonth+"/"+d.monthlyLimit+"\nRemaining: "+d.remaining;setText("stat-remaining",d.remaining);setText("stat-plan",d.plan);window._currentPlan=d.plan;updateOnboarding(d.usedThisMonth>0);}else if(box)box.textContent=data.error||"Failed";}).catch(function(e){if(box)box.textContent="Error: "+e.message;});}
+function drawChart(canvasId,labels,values,color){if(typeof Chart==="undefined")return;var canvas=document.getElementById(canvasId);if(!canvas)return;var existing=canvasId==="chart-day"?chartDay:chartOv;if(existing)existing.destroy();var ch=new Chart(canvas,{type:"line",data:{labels:labels,datasets:[{data:values,borderColor:color,backgroundColor:"rgba(59,130,246,0.15)",fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#94a3b8",maxTicks:8},grid:{color:"#1c1c3a"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#1c1c3a"},beginAtZero:true}}});if(canvasId==="chart-day")chartDay=ch;else chartOv=ch;}
+function loadAnalytics(){var c=getConfig();if(!c.kycUrl)return;Promise.all([fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/summary",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}),fetch(c.kycUrl.replace(/\/$/,"")+"/v1/analytics/events?limit=30",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();})]).then(function(results){var sum=results[0],evt=results[1];if(!sum.success)return;var d=sum.data;setText("stat-total",d.totalCalls);setText("stat-24h",d.last24h);setText("stat-ok",d.success);setText("stat-fail",d.failed);setText("stat-latency",d.avgLatencyMs+"ms");setText("a-total",d.totalCalls);setText("a-24",d.last24h);setText("a-lat",d.avgLatencyMs+"ms");setText("a-rate",d.totalCalls?Math.round(d.success/d.totalCalls*100)+"%":"—");var days=Object.keys(d.byDay||{}).sort();var vals=days.map(function(k){return d.byDay[k];});drawChart("chart-day",days,vals,"#3b82f6");drawChart("chart-overview",days,vals,"#f59e0b");var epList=document.getElementById("endpoint-list");if(epList){var eps=d.byEndpoint||{},keys=Object.keys(eps);epList.textContent=keys.length?keys.map(function(k){return k+": "+eps[k];}).join("\n"):"No data yet";}var tbody=document.getElementById("events-body");if(tbody){if(evt.success&&evt.data&&evt.data.length){tbody.innerHTML=evt.data.map(function(e){var cls=e.statusCode<400?"status-ok":"status-err";return "<tr><td>"+new Date(e.timestamp).toLocaleString()+"</td><td>"+e.endpoint+"</td><td class=\""+cls+"\">"+e.statusCode+"</td><td>"+e.latencyMs+"ms</td></tr>";}).join("");}else tbody.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--muted)\">No events yet</td></tr>";}if(d.totalCalls>0)localStorage.setItem("dt_first_call","1");updateOnboarding(d.totalCalls>0);}).catch(function(e){console.error(e);});}
+function listKeys(){var c=getConfig();var tbody=document.getElementById("keys-body");if(!tbody)return;if(!c.kycUrl){tbody.innerHTML="<tr><td colspan=\"6\">Set KYC URL</td></tr>";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/list",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){if(!data.success||!data.data.length){tbody.innerHTML="<tr><td colspan=\"6\">No keys</td></tr>";return;}tbody.innerHTML=data.data.map(function(k){return "<tr><td>"+k.name+"</td><td>"+k.keyPreview+"</td><td>"+k.plan+"</td><td>"+k.usedThisMonth+"/"+k.monthlyLimit+"</td><td class=\""+(k.active?"status-ok":"status-err")+"\">"+(k.active?"Active":"Revoked")+"</td><td>"+(k.active?"<button class=\"danger\" style=\"padding:.3rem .6rem;font-size:.75rem\" data-revoke=\""+k.id+"\">Revoke</button>":"<button style=\"padding:.3rem .6rem;font-size:.75rem\" data-activate=\""+k.id+"\">Activate</button>")+"</td></tr>";}).join("");tbody.querySelectorAll("[data-revoke]").forEach(function(btn){btn.addEventListener("click",function(){revokeKey(btn.getAttribute("data-revoke"));});});tbody.querySelectorAll("[data-activate]").forEach(function(btn){btn.addEventListener("click",function(){activateKey(btn.getAttribute("data-activate"));});});}).catch(function(e){tbody.innerHTML="<tr><td colspan=\"6\">Error: "+e.message+"</td></tr>";});}
+function revokeKey(keyId){var c=getConfig();fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/revoke",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({keyId:keyId})}).then(function(r){return r.json();}).then(function(){listKeys();}).catch(function(e){alert(e.message);});}
+function activateKey(keyId){var c=getConfig();fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/activate",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({keyId:keyId})}).then(function(r){return r.json();}).then(function(){listKeys();}).catch(function(e){alert(e.message);});}
+function createKey(){var name=document.getElementById("new-key-name").value.trim();var plan=document.getElementById("new-key-plan").value;var el=document.getElementById("key-result");el.style.display="block";if(!name){el.textContent="Name required";return;}var c=getConfig();if(!c.kycUrl){el.textContent="Set KYC URL";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/keys/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,plan:plan})}).then(function(r){return r.json();}).then(function(data){el.textContent=JSON.stringify(data,null,2)+(data.success?"\n\nCopy key now":"");listKeys();}).catch(function(e){el.textContent="Error: "+e.message;});}
+function renderSnippet(){var c=getConfig();var base=c.kycUrl||"https://YOUR_KYC_API";var key=c.apiKey||"dev-key-123";var ep=document.getElementById("snip-endpoint").value;var path="/v1/kyc/bvn",body='{"bvn":"12345678901","firstName":"Adebayo","lastName":"Okafor"}';if(ep==="kyc-nin"){path="/v1/kyc/nin";body='{"nin":"12345678901","firstName":"Chioma","lastName":"Nwosu"}';}if(ep==="prop-desc"){base=c.propUrl||"https://YOUR_PROPERTY_API";path="/v1/property/generate-description";body='{"location":"Lekki","propertyType":"apartment","bedrooms":3,"tone":"luxury"}';}if(ep==="keys-me"){path="/v1/keys/me";body=null;}var text="";if(snipLang==="curl"){if(body)text="curl -X POST '"+base+path+"' \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-API-Key: "+key+"' \\\n  -d '"+body+"'";else text="curl '"+base+path+"' \\\n  -H 'X-API-Key: "+key+"'";}else if(snipLang==="js"){if(body)text="const res = await fetch('"+base+path+"', {\n  method: 'POST',\n  headers: {'Content-Type': 'application/json','X-API-Key': '"+key+"'},\n  body: JSON.stringify("+body+")\n});\nconst data = await res.json();";else text="const res = await fetch('"+base+path+"', {headers: {'X-API-Key': '"+key+"'}});\nconst data = await res.json();";}else{if(body)text="import requests\nres = requests.post('"+base+path+"', headers={'X-API-Key': '"+key+"'}, json="+body.replace(/\"/g,"'")+")\nprint(res.json())";else text="import requests\nres = requests.get('"+base+path+"', headers={'X-API-Key': '"+key+"'})\nprint(res.json())";}document.getElementById("snippet-box").textContent=text;}
+function loadWebhook(){var c=getConfig();var el=document.getElementById("wh-result");if(!c.kycUrl){el.textContent="Set KYC URL in Settings";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){if(data.success&&data.data){document.getElementById("wh-url").value=data.data.url||"";el.textContent="Active\nURL: "+data.data.url+"\nSecret: "+data.data.secret;}else el.textContent="No webhook configured";}).catch(function(e){el.textContent="Error: "+e.message;});}
+function saveWebhook(){var c=getConfig();var el=document.getElementById("wh-result");var url=document.getElementById("wh-url").value.trim();var events=[];if(document.getElementById("wh-ev1").checked)events.push("kyc.completed");if(document.getElementById("wh-ev2").checked)events.push("kyc.failed");if(!url){el.textContent="URL required";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({url:url,events:events})}).then(function(r){return r.json();}).then(function(data){el.textContent=JSON.stringify(data,null,2);}).catch(function(e){el.textContent="Error: "+e.message;});}
+function deleteWebhook(){var c=getConfig();fetch(c.kycUrl.replace(/\/$/,"")+"/v1/webhooks",{method:"DELETE",headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){document.getElementById("wh-result").textContent=data.message||"Removed";document.getElementById("wh-url").value="";}).catch(function(e){document.getElementById("wh-result").textContent=e.message;});}
 var PLAN_FEATURES={starter:["500 calls/mo"],growth:["2,000 calls/mo"],business:["10,000 calls/mo"],enterprise:["Unlimited"]};
-function loadPlans(){
-  var container=document.getElementById("plan-cards");
-  if(!container)return;
-  var c=getConfig();
-  if(!c.kycUrl){container.innerHTML="<p style='color:var(--muted)'>Set KYC URL</p>";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/plans")
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.success)throw new Error(data.error||"Failed");
-      var cur=window._currentPlan||"growth";
-      container.innerHTML=data.data.map(function(p){
-        var is=p.name===cur;
-        var feats=(PLAN_FEATURES[p.name]||[]).map(function(f){return "<li>"+f+"</li>";}).join("");
-        return "<div class=\"plan-card"+(p.name==="growth"?" featured":"")+"\">"+(is?"<span class=\"badge-current\">Current</span>":"")+
-          "<div class=\"plan-name\">"+p.name+"</div><div class=\"plan-price\">"+(p.priceFormatted||("\u20a6"+(p.priceNGN||0).toLocaleString()))+" <span>/mo</span></div>"+
-          "<ul>"+feats+"</ul><button class=\""+(is?"":"amber")+"\" data-plan=\""+p.name+"\" "+(is?"disabled":"")+">"+(is?"Current":"Upgrade")+"</button></div>";
-      }).join("");
-      container.querySelectorAll("button[data-plan]").forEach(function(btn){
-        btn.addEventListener("click",function(){startUpgrade(btn.getAttribute("data-plan"));});
-      });
-    }).catch(function(e){container.innerHTML="<p style='color:#ef4444'>"+e.message+"</p>";});
-}
-function startUpgrade(plan){
-  var email=document.getElementById("billing-email").value.trim();
-  var el=document.getElementById("payment-result");
-  if(!email){el.textContent="Enter email first";return;}
-  var c=getConfig();
-  el.textContent="Initializing Paystack...";
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({plan:plan,email:email})})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.success)throw new Error(data.error||"Failed");
-      localStorage.setItem("dt_pending_ref",data.data.reference);
-      localStorage.setItem("dt_pending_plan",plan);
-      window.location.href=data.data.authorization_url;
-    }).catch(function(e){el.textContent="Error: "+e.message;});
-}
-function loadBillingHistory(){
-  var c=getConfig();
-  var tbody=document.getElementById("billing-body");
-  if(!tbody)return;
-  if(!c.kycUrl){tbody.innerHTML="<tr><td colspan=\"5\">Set KYC URL</td></tr>";return;}
-  fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/history",{headers:{"X-API-Key":c.apiKey}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.success||!data.data.length){tbody.innerHTML="<tr><td colspan=\"5\" style=\"color:var(--muted)\">No payments yet</td></tr>";return;}
-      tbody.innerHTML=data.data.map(function(p){
-        return "<tr><td>"+new Date(p.paidAt).toLocaleString()+"</td><td>"+p.plan+"</td><td>\u20a6"+((p.amount||0)/100).toLocaleString()+
-          "</td><td>"+p.reference+"</td><td class=\"status-ok\">"+p.status+"</td></tr>";
-      }).join("");
-    }).catch(function(e){tbody.innerHTML="<tr><td colspan=\"5\">"+e.message+"</td></tr>";});
-}
-
+function loadPlans(){var container=document.getElementById("plan-cards");if(!container)return;var c=getConfig();if(!c.kycUrl){container.innerHTML="<p style='color:var(--muted)'>Set KYC URL</p>";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/plans").then(function(r){return r.json();}).then(function(data){if(!data.success)throw new Error(data.error||"Failed");var cur=window._currentPlan||"growth";container.innerHTML=data.data.map(function(p){var is=p.name===cur;var feats=(PLAN_FEATURES[p.name]||[]).map(function(f){return "<li>"+f+"</li>";}).join("");return "<div class=\"plan-card"+(p.name==="growth"?" featured":"")+"\">"+(is?"<span class=\"badge-current\">Current</span>":"")+"<div class=\"plan-name\">"+p.name+"</div><div class=\"plan-price\">"+(p.priceFormatted||("₦"+(p.priceNGN||0).toLocaleString()))+" <span>/mo</span></div><ul>"+feats+"</ul><button class=\""+(is?"":"amber")+"\" data-plan=\""+p.name+"\" "+(is?"disabled":"")+">"+(is?"Current":"Upgrade")+"</button></div>";}).join("");container.querySelectorAll("button[data-plan]").forEach(function(btn){btn.addEventListener("click",function(){startUpgrade(btn.getAttribute("data-plan"));});});}).catch(function(e){container.innerHTML="<p style='color:#ef4444'>"+e.message+"</p>";});}
+function startUpgrade(plan){var email=document.getElementById("billing-email").value.trim();var el=document.getElementById("payment-result");if(!email){el.textContent="Enter email first";return;}var c=getConfig();el.textContent="Initializing Paystack...";fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/initialize",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":c.apiKey},body:JSON.stringify({plan:plan,email:email})}).then(function(r){return r.json();}).then(function(data){if(!data.success)throw new Error(data.error||"Failed");localStorage.setItem("dt_pending_ref",data.data.reference);window.location.href=data.data.authorization_url;}).catch(function(e){el.textContent="Error: "+e.message;});}
+function loadBillingHistory(){var c=getConfig();var tbody=document.getElementById("billing-body");if(!tbody)return;if(!c.kycUrl){tbody.innerHTML="<tr><td colspan=\"5\">Set KYC URL</td></tr>";return;}fetch(c.kycUrl.replace(/\/$/,"")+"/v1/payment/history",{headers:{"X-API-Key":c.apiKey}}).then(function(r){return r.json();}).then(function(data){if(!data.success||!data.data.length){tbody.innerHTML="<tr><td colspan=\"5\" style=\"color:var(--muted)\">No payments yet</td></tr>";return;}tbody.innerHTML=data.data.map(function(p){return "<tr><td>"+new Date(p.paidAt).toLocaleString()+"</td><td>"+p.plan+"</td><td>₦"+((p.amount||0)/100).toLocaleString()+"</td><td>"+p.reference+"</td><td class=\"status-ok\">"+p.status+"</td></tr>";}).join("");}).catch(function(e){tbody.innerHTML="<tr><td colspan=\"5\">"+e.message+"</td></tr>";});}
 function loadOverview(){updateBanner();checkHealth();loadUsage();loadAnalytics();updateOnboarding(false);}
-
 function initApp(){
-  var kyc=document.getElementById("kyc-url"), prop=document.getElementById("prop-url"), key=document.getElementById("api-key");
-  if(kyc)kyc.value=localStorage.getItem("dt_kyc_url")||"";
-  if(prop)prop.value=localStorage.getItem("dt_prop_url")||"";
-  if(key)key.value=localStorage.getItem("dt_api_key")||"dev-key-123";
-  document.querySelectorAll(".nav-item").forEach(function(item){
-    item.addEventListener("click",function(e){e.preventDefault();var p=item.getAttribute("data-page");if(p)showPage(p);});
-  });
-  function on(id,fn){var el=document.getElementById(id);if(el)el.addEventListener("click",fn);}
-  on("btn-save",saveSettings);on("btn-kyc",runKyc);on("btn-prop",runProperty);
-  on("btn-create-key",createKey);on("btn-list-keys",listKeys);on("btn-refresh-analytics",loadAnalytics);
-  on("btn-wh-save",saveWebhook);on("btn-wh-load",loadWebhook);on("btn-wh-del",deleteWebhook);
-  on("btn-billing-hist",loadBillingHistory);
-  on("btn-copy-snip",function(){navigator.clipboard.writeText(document.getElementById("snippet-box").textContent);alert("Copied");});
-  var se=document.getElementById("snip-endpoint");
-  if(se)se.addEventListener("change",renderSnippet);
-  document.querySelectorAll(".snippet-tabs button").forEach(function(btn){
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".snippet-tabs button").forEach(function(b){b.classList.remove("active");});
-      btn.classList.add("active");snipLang=btn.getAttribute("data-lang");renderSnippet();
-    });
-  });
-  showPage("overview");
-  console.log("DoyinTech Dashboard v2 ready");
+var kyc=document.getElementById("kyc-url"),prop=document.getElementById("prop-url"),key=document.getElementById("api-key");
+if(kyc)kyc.value=localStorage.getItem("dt_kyc_url")||"";
+if(prop)prop.value=localStorage.getItem("dt_prop_url")||"";
+var wa=document.getElementById("wa-url");if(wa)wa.value=localStorage.getItem("dt_wa_url")||"";
+var ln=document.getElementById("learn-url");if(ln)ln.value=localStorage.getItem("dt_learn_url")||"";
+if(key)key.value=localStorage.getItem("dt_api_key")||"dev-key-123";
+document.querySelectorAll(".nav-item").forEach(function(item){item.addEventListener("click",function(e){e.preventDefault();var p=item.getAttribute("data-page");if(p)showPage(p);});});
+function on(id,fn){var el=document.getElementById(id);if(el)el.addEventListener("click",fn);}
+on("btn-save",saveSettings);on("btn-kyc",runKyc);on("btn-prop",runProperty);
+on("btn-create-key",createKey);on("btn-list-keys",listKeys);on("btn-refresh-analytics",loadAnalytics);
+on("btn-wh-save",saveWebhook);on("btn-wh-load",loadWebhook);on("btn-wh-del",deleteWebhook);
+on("btn-billing-hist",loadBillingHistory);
+on("btn-wa-send",runWaSend);on("btn-wa-reply",runWaReply);
+on("btn-learn-lesson",runLearnLesson);on("btn-learn-quiz",runLearnQuiz);on("btn-learn-tutor",runLearnTutor);
+on("btn-copy-snip",function(){navigator.clipboard.writeText(document.getElementById("snippet-box").textContent);alert("Copied");});
+var se=document.getElementById("snip-endpoint");if(se)se.addEventListener("change",renderSnippet);
+document.querySelectorAll(".snippet-tabs button").forEach(function(btn){btn.addEventListener("click",function(){document.querySelectorAll(".snippet-tabs button").forEach(function(b){b.classList.remove("active");});btn.classList.add("active");snipLang=btn.getAttribute("data-lang");renderSnippet();});});
+showPage("overview");console.log("DoyinTech Dashboard v3 ready");
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initApp);
-else initApp();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initApp);else initApp();
 })();
