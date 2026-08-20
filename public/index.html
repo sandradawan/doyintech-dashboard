@@ -31,11 +31,11 @@ button{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none
 button.amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a1a}
 button.danger{background:linear-gradient(135deg,#ef4444,#dc2626)}
 button.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
-button:hover{opacity:.9}button:disabled{opacity:.45;cursor:not-allowed}
-.result{background:#0a0a1f;border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-top:.85rem;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:.78rem;max-height:280px;overflow:auto;display:none}
+button:hover{opacity:.9}button:disabled{opacity:.45}
+.result{background:#0a0a1f;border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-top:.85rem;white-space:pre-wrap;font-family:monospace;font-size:.78rem;max-height:280px;overflow:auto;display:none}
 .hidden{display:none!important}
 .config-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
-.key-box{background:#0a0a1f;border:1px dashed var(--border);border-radius:8px;padding:.75rem;font-family:ui-monospace,monospace;font-size:.82rem;word-break:break-all}
+.key-box{background:#0a0a1f;border:1px dashed var(--border);border-radius:8px;padding:.75rem;font-family:monospace;font-size:.82rem;word-break:break-all}
 .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.9rem}
 .plan-card{background:#0a0a1f;border:1px solid var(--border);border-radius:12px;padding:1.1rem;position:relative}
 .plan-card.featured{border-color:#f59e0b}
@@ -49,7 +49,7 @@ button:hover{opacity:.9}button:disabled{opacity:.45;cursor:not-allowed}
 .badge-current{position:absolute;top:8px;right:8px;background:rgba(34,197,94,.15);color:#4ade80;font-size:.65rem;padding:.12rem .45rem;border-radius:999px}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 th,td{padding:.5rem .65rem;text-align:left;border-bottom:1px solid var(--border)}
-th{color:var(--muted);font-weight:500}
+th{color:var(--muted)}
 .status-ok{color:var(--green)}.status-err{color:var(--red)}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -59,7 +59,6 @@ th{color:var(--muted);font-weight:500}
 .dot{width:8px;height:8px;border-radius:50%}
 .dot.up{background:var(--green)}.dot.down{background:var(--red)}.dot.unk{background:var(--muted)}
 .check{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.9rem}
-.check:last-child{border-bottom:none}
 .check .box{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem}
 .check.done .box{background:rgba(34,197,94,.2);border-color:var(--green);color:var(--green)}
 .snippet-tabs{display:flex;gap:.4rem;margin-bottom:.75rem;flex-wrap:wrap}
@@ -89,227 +88,160 @@ th{color:var(--muted);font-weight:500}
 <main class="main">
 <section id="page-overview">
   <h1><span class="live-dot"></span>Dashboard</h1>
-  <p class="subtitle">SaaS control center for DoyinTech APIs</p>
-  <div id="setup-banner" class="banner hidden">Set your API URLs in <b>Settings</b> to unlock live data.</div>
-  <div class="health" id="health-row">
-    <div class="health-pill"><span class="dot unk" id="dot-kyc"></span> KYC <span id="hl-kyc" style="color:var(--muted)">—</span></div>
-    <div class="health-pill"><span class="dot unk" id="dot-prop"></span> Property <span id="hl-prop" style="color:var(--muted)">—</span></div>
-    <div class="health-pill"><span class="dot unk" id="dot-wa"></span> WhatsApp <span id="hl-wa" style="color:var(--muted)">—</span></div>
-    <div class="health-pill"><span class="dot unk" id="dot-learn"></span> Learn <span id="hl-learn" style="color:var(--muted)">—</span></div>
+  <p class="subtitle">SaaS control center</p>
+  <div id="setup-banner" class="banner hidden">Set API URLs in <b>Settings</b>.</div>
+  <div class="health">
+    <div class="health-pill"><span class="dot unk" id="dot-kyc"></span> KYC <span id="hl-kyc">—</span></div>
+    <div class="health-pill"><span class="dot unk" id="dot-prop"></span> Property <span id="hl-prop">—</span></div>
+    <div class="health-pill"><span class="dot unk" id="dot-wa"></span> WhatsApp <span id="hl-wa">—</span></div>
+    <div class="health-pill"><span class="dot unk" id="dot-learn"></span> Learn <span id="hl-learn">—</span></div>
   </div>
   <div class="cards">
     <div class="stat-card"><div class="label">Total Calls</div><div class="value blue" id="stat-total">—</div></div>
     <div class="stat-card"><div class="label">Last 24h</div><div class="value amber" id="stat-24h">—</div></div>
     <div class="stat-card"><div class="label">Success</div><div class="value green" id="stat-ok">—</div></div>
     <div class="stat-card"><div class="label">Failed</div><div class="value red" id="stat-fail">—</div></div>
-    <div class="stat-card"><div class="label">Avg Latency</div><div class="value" id="stat-latency">—</div></div>
     <div class="stat-card"><div class="label">Quota Left</div><div class="value green" id="stat-remaining">—</div></div>
     <div class="stat-card"><div class="label">Plan</div><div class="value" id="stat-plan">—</div></div>
   </div>
-  <div class="grid-2">
-    <div class="panel"><h2>Onboarding</h2>
-      <div class="check" id="chk-url"><div class="box"></div><span>Set API URLs in Settings</span></div>
-      <div class="check" id="chk-key"><div class="box"></div><span>API key configured</span></div>
-      <div class="check" id="chk-health"><div class="box"></div><span>API health OK</span></div>
-      <div class="check" id="chk-call"><div class="box"></div><span>Made first API call</span></div>
-      <div class="check" id="chk-upgrade"><div class="box"></div><span>Upgrade plan (optional)</span></div>
-    </div>
-    <div class="panel"><h2>Usage (30 days)</h2><div class="chart-wrap"><canvas id="chart-overview"></canvas></div></div>
+  <div class="panel"><h2>Onboarding</h2>
+    <div class="check" id="chk-url"><div class="box"></div><span>Set API URLs</span></div>
+    <div class="check" id="chk-key"><div class="box"></div><span>API key set</span></div>
+    <div class="check" id="chk-health"><div class="box"></div><span>API healthy</span></div>
+    <div class="check" id="chk-call"><div class="box"></div><span>First API call</span></div>
   </div>
 </section>
-<section id="page-analytics" class="hidden">
-  <h1>Analytics</h1>
+<section id="page-analytics" class="hidden"><h1>Analytics</h1>
   <div class="cards">
     <div class="stat-card"><div class="label">Total</div><div class="value blue" id="a-total">0</div></div>
     <div class="stat-card"><div class="label">Success rate</div><div class="value green" id="a-rate">—</div></div>
     <div class="stat-card"><div class="label">Avg latency</div><div class="value" id="a-lat">—</div></div>
     <div class="stat-card"><div class="label">Last 24h</div><div class="value amber" id="a-24">0</div></div>
   </div>
-  <div class="panel"><h2>Calls by day</h2><div class="chart-wrap"><canvas id="chart-day"></canvas></div></div>
-  <div class="panel"><h2>By endpoint</h2><div id="endpoint-list" class="key-box">No data yet</div></div>
-  <div class="panel"><h2>Recent events</h2>
+  <div class="panel"><h2>By endpoint</h2><div id="endpoint-list" class="key-box">No data</div></div>
+  <div class="panel"><button id="btn-refresh-analytics">Refresh</button>
     <table><thead><tr><th>Time</th><th>Endpoint</th><th>Status</th><th>Latency</th></tr></thead>
-    <tbody id="events-body"><tr><td colspan="4" style="color:var(--muted)">No events</td></tr></tbody></table>
-    <button style="margin-top:.8rem" id="btn-refresh-analytics">Refresh</button>
+    <tbody id="events-body"><tr><td colspan="4">No events</td></tr></tbody></table></div>
+</section>
+<section id="page-kyc" class="hidden"><h1>KYC API</h1>
+  <div class="panel">
+    <select id="kyc-endpoint"><option value="bvn">bvn</option><option value="nin">nin</option><option value="document">document</option><option value="face-match">face-match</option></select>
+    <textarea id="kyc-body" rows="4">{"bvn":"12345678901","firstName":"Adebayo","lastName":"Okafor"}</textarea>
+    <button id="btn-kyc">Run</button><div class="result" id="kyc-result"></div>
   </div>
 </section>
-<section id="page-kyc" class="hidden">
-  <h1>KYC API</h1>
+<section id="page-property" class="hidden"><h1>Property AI</h1>
   <div class="panel">
-    <label>Endpoint</label>
-    <select id="kyc-endpoint"><option value="bvn">/v1/kyc/bvn</option><option value="nin">/v1/kyc/nin</option><option value="document">/v1/kyc/document</option><option value="face-match">/v1/kyc/face-match</option></select>
-    <label>Body (JSON)</label>
-    <textarea id="kyc-body" rows="5">{"bvn":"12345678901","firstName":"Adebayo","lastName":"Okafor"}</textarea>
-    <button id="btn-kyc">Run Request</button>
-    <div class="result" id="kyc-result"></div>
+    <select id="prop-endpoint"><option value="generate-description">generate-description</option><option value="listing-pack">listing-pack</option><option value="suggest-price">suggest-price</option><option value="analyze-document">analyze-document</option></select>
+    <textarea id="prop-body" rows="4">{"location":"Lekki","propertyType":"apartment","bedrooms":3,"price":"85000000","tone":"luxury"}</textarea>
+    <button class="amber" id="btn-prop">Run</button><div class="result" id="prop-result"></div>
   </div>
 </section>
-<section id="page-property" class="hidden">
-  <h1>Property AI</h1>
+<section id="page-whatsapp" class="hidden"><h1>WhatsApp</h1>
   <div class="panel">
-    <label>Endpoint</label>
-    <select id="prop-endpoint">
-      <option value="generate-description">generate-description</option>
-      <option value="listing-pack">listing-pack</option>
-      <option value="suggest-price">suggest-price</option>
-      <option value="analyze-document">analyze-document</option>
-      <option value="summarize">summarize</option>
-      <option value="suggest-improvements">suggest-improvements</option>
-    </select>
-    <label>Body (JSON)</label>
-    <textarea id="prop-body" rows="6">{"location":"Lekki Phase 1, Lagos","propertyType":"apartment","bedrooms":3,"price":"85000000","features":["pool"],"tone":"luxury"}</textarea>
-    <button class="amber" id="btn-prop">Run Request</button>
-    <div class="result" id="prop-result"></div>
-  </div>
-</section>
-<section id="page-whatsapp" class="hidden">
-  <h1>WhatsApp Automation</h1>
-  <div class="panel">
-    <h2>Send message</h2>
-    <label>To (country code + number)</label>
     <input id="wa-to" placeholder="2348012345678"/>
-    <label>Message</label>
-    <textarea id="wa-message" rows="3">Hello from DoyinTech!</textarea>
-    <button id="btn-wa-send">Send</button>
-    <div class="result" id="wa-send-result"></div>
+    <textarea id="wa-message" rows="2">Hello from DoyinTech</textarea>
+    <button id="btn-wa-send">Send</button><div class="result" id="wa-send-result"></div>
   </div>
   <div class="panel">
-    <h2>Auto-reply preview</h2>
-    <label>Incoming text</label>
-    <textarea id="wa-incoming" rows="2">How much is the Lekki apartment?</textarea>
-    <label>Business context</label>
-    <input id="wa-context" placeholder="We sell properties in Lagos"/>
-    <button class="amber" id="btn-wa-reply">Generate reply</button>
-    <div class="result" id="wa-reply-result"></div>
+    <textarea id="wa-incoming" rows="2">How much is the apartment?</textarea>
+    <input id="wa-context" placeholder="Business context"/>
+    <button class="amber" id="btn-wa-reply">Auto-reply</button><div class="result" id="wa-reply-result"></div>
   </div>
 </section>
-<section id="page-learn" class="hidden">
-  <h1>Learn AI</h1>
+<section id="page-learn" class="hidden"><h1>Learn AI</h1>
   <div class="panel">
-    <h2>Generate lesson</h2>
-    <div class="config-row">
-      <div><label>Topic</label><input id="learn-topic" value="Fractions"/></div>
-      <div><label>Subject</label><input id="learn-subject" value="Mathematics"/></div>
-    </div>
-    <div class="config-row">
-      <div><label>Class level</label><input id="learn-class" value="Primary 5"/></div>
-      <div><label>Age</label><input id="learn-age" type="number" value="10"/></div>
-    </div>
-    <button id="btn-learn-lesson">Generate lesson</button>
-    <div class="result" id="learn-lesson-result"></div>
+    <input id="learn-topic" value="Fractions"/><input id="learn-subject" value="Mathematics"/>
+    <input id="learn-class" value="Primary 5"/><input id="learn-age" type="number" value="10"/>
+    <button id="btn-learn-lesson">Lesson</button><div class="result" id="learn-lesson-result"></div>
   </div>
   <div class="panel">
-    <h2>Generate quiz</h2>
-    <div class="config-row">
-      <div><label>Topic</label><input id="quiz-topic" value="Photosynthesis"/></div>
-      <div><label>Class level</label><input id="quiz-class" value="JSS1"/></div>
-    </div>
-    <button class="amber" id="btn-learn-quiz">Generate quiz</button>
-    <div class="result" id="learn-quiz-result"></div>
+    <input id="quiz-topic" value="Photosynthesis"/><input id="quiz-class" value="JSS1"/>
+    <button class="amber" id="btn-learn-quiz">Quiz</button><div class="result" id="learn-quiz-result"></div>
   </div>
   <div class="panel">
-    <h2>Tutor chat</h2>
-    <label>Student question</label>
     <textarea id="tutor-msg" rows="2">Why is the sky blue?</textarea>
-    <button id="btn-learn-tutor">Ask tutor</button>
-    <div class="result" id="learn-tutor-result"></div>
+    <button id="btn-learn-tutor">Tutor</button><div class="result" id="learn-tutor-result"></div>
   </div>
 </section>
-<section id="page-keys" class="hidden">
-  <h1>API Keys</h1>
+<section id="page-keys" class="hidden"><h1>API Keys</h1>
   <div class="panel">
-    <h2>Create key</h2>
-    <div class="config-row">
-      <div><label>Name</label><input id="new-key-name" placeholder="Production App"/></div>
-      <div><label>Plan</label><select id="new-key-plan"><option value="starter">Starter</option><option value="growth">Growth</option><option value="business">Business</option></select></div>
-    </div>
-    <button id="btn-create-key">Create</button>
-    <div class="result" id="key-result"></div>
+    <input id="new-key-name" placeholder="Name"/>
+    <select id="new-key-plan"><option value="starter">Starter</option><option value="growth">Growth</option></select>
+    <button id="btn-create-key">Create</button><div class="result" id="key-result"></div>
   </div>
-  <div class="panel">
-    <h2>Your keys</h2>
-    <button id="btn-list-keys" style="margin-bottom:.8rem">Refresh list</button>
-    <table><thead><tr><th>Name</th><th>Key</th><th>Plan</th><th>Usage</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody id="keys-body"><tr><td colspan="6" style="color:var(--muted)">Click Refresh</td></tr></tbody></table>
-  </div>
-  <div class="panel"><h2>Current key usage</h2><div id="usage-box" class="key-box">—</div></div>
+  <div class="panel"><button id="btn-list-keys">Refresh list</button>
+    <table><thead><tr><th>Name</th><th>Key</th><th>Plan</th><th>Usage</th><th>Status</th><th></th></tr></thead>
+    <tbody id="keys-body"></tbody></table></div>
+  <div class="panel"><div id="usage-box" class="key-box">—</div></div>
 </section>
-<section id="page-snippets" class="hidden">
-  <h1>Code Snippets</h1>
+<section id="page-snippets" class="hidden"><h1>Snippets</h1>
   <div class="panel">
-    <label>Endpoint</label>
-    <select id="snip-endpoint">
-      <option value="kyc-bvn">KYC · BVN</option>
-      <option value="kyc-nin">KYC · NIN</option>
-      <option value="prop-desc">Property · Generate description</option>
-      <option value="keys-me">Keys · Usage</option>
-    </select>
-    <div class="snippet-tabs">
-      <button type="button" class="active" data-lang="curl">cURL</button>
-      <button type="button" data-lang="js">JavaScript</button>
-      <button type="button" data-lang="python">Python</button>
-    </div>
-    <pre class="key-box" id="snippet-box" style="white-space:pre-wrap;min-height:120px"></pre>
-    <button id="btn-copy-snip">Copy</button>
+    <select id="snip-endpoint"><option value="kyc-bvn">KYC BVN</option><option value="prop-desc">Property</option></select>
+    <div class="snippet-tabs"><button type="button" class="active" data-lang="curl">cURL</button><button type="button" data-lang="js">JS</button><button type="button" data-lang="python">Python</button></div>
+    <pre class="key-box" id="snippet-box"></pre><button id="btn-copy-snip">Copy</button>
   </div>
 </section>
-<section id="page-webhooks" class="hidden">
-  <h1>Webhooks</h1>
+<section id="page-webhooks" class="hidden"><h1>Webhooks</h1>
   <div class="panel">
-    <label>Webhook URL</label>
-    <input id="wh-url" placeholder="https://your-app.com/webhooks/doyintech"/>
-    <div style="margin-bottom:.75rem;font-size:.88rem;color:var(--muted)">
-      <label style="display:inline;margin-right:1rem"><input type="checkbox" id="wh-ev1" checked/> kyc.completed</label>
-      <label style="display:inline"><input type="checkbox" id="wh-ev2" checked/> kyc.failed</label>
-    </div>
-    <button id="btn-wh-save">Save webhook</button>
-    <button class="ghost" id="btn-wh-load" style="margin-left:.4rem">Load</button>
-    <button class="danger" id="btn-wh-del" style="margin-left:.4rem">Remove</button>
+    <input id="wh-url" placeholder="https://your-app.com/hook"/>
+    <label><input type="checkbox" id="wh-ev1" checked/> kyc.completed</label>
+    <label><input type="checkbox" id="wh-ev2" checked/> kyc.failed</label>
+    <button id="btn-wh-save">Save</button><button class="ghost" id="btn-wh-load">Load</button><button class="danger" id="btn-wh-del">Remove</button>
     <div class="result" id="wh-result" style="display:block"></div>
   </div>
 </section>
-<section id="page-billing" class="hidden">
-  <h1>Billing</h1>
-  <div class="panel"><label>Email</label><input id="billing-email" type="email" placeholder="you@company.com"/></div>
+<section id="page-billing" class="hidden"><h1>Billing</h1>
+  <div class="panel"><input id="billing-email" type="email" placeholder="email@company.com"/></div>
   <div class="plan-grid" id="plan-cards"></div>
-  <div class="panel" style="margin-top:1rem"><h2>Status</h2><div id="payment-result" class="key-box">Select a plan</div></div>
-  <div class="panel"><h2>Billing history</h2>
-    <button id="btn-billing-hist" style="margin-bottom:.8rem">Refresh</button>
-    <table><thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Reference</th><th>Status</th></tr></thead>
-    <tbody id="billing-body"><tr><td colspan="5" style="color:var(--muted)">No payments yet</td></tr></tbody></table>
-  </div>
+  <div class="panel"><div id="payment-result" class="key-box">Select plan</div></div>
+  <div class="panel"><button id="btn-billing-hist">Refresh history</button>
+    <table><thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Ref</th><th>Status</th></tr></thead>
+    <tbody id="billing-body"></tbody></table></div>
 </section>
-<section id="page-docs" class="hidden">
-  <h1>API Docs</h1>
-  <div class="panel">
-    <h2>Auth</h2><p style="color:var(--muted);font-size:.9rem">Header <code>X-API-Key</code></p>
-    <h2>KYC</h2><pre class="key-box">POST /v1/kyc/bvn | nin | document | face-match
-GET /v1/kyc/provider</pre>
-    <h2>Property</h2><pre class="key-box">POST /v1/property/listing-pack
-POST /v1/property/suggest-price
-POST /v1/property/generate-description</pre>
-    <h2>WhatsApp</h2><pre class="key-box">POST /v1/whatsapp/send
-POST /v1/whatsapp/auto-reply</pre>
-    <h2>Learn</h2><pre class="key-box">POST /v1/learn/lesson | quiz | tutor</pre>
-  </div>
+<section id="page-docs" class="hidden"><h1>Docs</h1>
+  <div class="panel"><pre class="key-box">POST /v1/kyc/bvn
+POST /v1/property/listing-pack
+POST /v1/whatsapp/send
+POST /v1/learn/lesson</pre></div>
 </section>
-<section id="page-settings" class="hidden">
-  <h1>Settings</h1>
+<section id="page-settings" class="hidden"><h1>Settings</h1>
   <div class="panel">
-    <label>KYC API Base URL</label>
-    <input id="kyc-url" placeholder="https://your-kyc.up.railway.app"/>
-    <label>Property AI API Base URL</label>
-    <input id="prop-url" placeholder="https://your-property.up.railway.app"/>
-    <label>WhatsApp API Base URL</label>
-    <input id="wa-url" placeholder="https://your-whatsapp.up.railway.app"/>
-    <label>Learn AI API Base URL</label>
-    <input id="learn-url" placeholder="https://your-learn.up.railway.app"/>
-    <label>API Key</label>
-    <input id="api-key" placeholder="dev-key-123"/>
+    <label>KYC URL</label><input id="kyc-url" placeholder="https://kyc-api..."/>
+    <label>Property URL</label><input id="prop-url" placeholder="https://property-api..."/>
+    <label>WhatsApp URL</label><input id="wa-url" placeholder="https://whatsapp-api..."/>
+    <label>Learn URL</label><input id="learn-url" placeholder="https://learn-api..."/>
+    <label>API Key</label><input id="api-key" placeholder="dev-key-123"/>
     <button id="btn-save">Save Settings</button>
   </div>
 </section>
 </main>
+<script>
+/* INLINE FALLBACK - sidebar always works */
+(function(){
+  function showPage(page){
+    document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
+    var a=document.querySelector('.nav-item[data-page="'+page+'"]');
+    if(a)a.classList.add("active");
+    document.querySelectorAll("main>section").forEach(function(s){s.classList.add("hidden");});
+    var el=document.getElementById("page-"+page);
+    if(el)el.classList.remove("hidden");
+  }
+  window.showPage=showPage;
+  function boot(){
+    document.querySelectorAll(".nav-item").forEach(function(item){
+      item.onclick=function(e){
+        e.preventDefault();
+        var p=item.getAttribute("data-page");
+        if(p)showPage(p);
+      };
+    });
+    console.log("Fallback nav ready");
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);
+  else boot();
+})();
+</script>
 <script src="app.js"></script>
 </body>
 </html>
